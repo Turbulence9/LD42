@@ -9,21 +9,11 @@ canvas.height = windowedHeight;
 let forkLift = {
   x: 200,
   y: 200,
-  speed: 10
+  speed: 9
 }
 //boxes[0] = x coord, boxes[1] = y coord, boxes[2] = x vel, boxes[3] = y vel, boxes[4] = width, boxes[5] = color
 var boxes = [];
 var x = 0;
-function update() {
-  canvas.width = canvas.width;
-  ctx.fillRect(forkLift.x,forkLift.y,20,20);
-  if(x % 2 == 0) {
-  spawnBoxes();
-  }
-  drawBoxes();
-  x+=1;
-  requestAnimationFrame(update);
-}
 
 function boxCollision(box1, box2) {
 	
@@ -73,6 +63,12 @@ function update() {
   canvas.width = canvas.width;
   ctx.fillRect(forkLift.x,forkLift.y,20,20);
   playerMovement(forkLift);
+  requestAnimationFrame(update);
+  if(x % 2 == 0) {
+  spawnBoxes();
+  }
+  drawBoxes();
+  x+=1;
   requestAnimationFrame(update);
 }
 
