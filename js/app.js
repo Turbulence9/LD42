@@ -9,8 +9,7 @@ canvas.height = windowedHeight;
 let forkLift = {
   x: 200,
   y: 200,
-<<<<<<< HEAD
-  speed: 10,
+  speed: 10
 }
 //boxes[0] = x coord, boxes[1] = y coord, boxes[2] = x vel, boxes[3] = y vel, boxes[4] = width, boxes[5] = color
 var boxes = [];
@@ -18,11 +17,9 @@ var x = 0;
 function update() {
   canvas.width = canvas.width;
   ctx.fillRect(forkLift.x,forkLift.y,20,20);
-  if(x %2 == 0) {
-	  
+  if(x % 2 == 0) {
   spawnBoxes();
   }
-  //ctx.fillRect(boxes[0][0],boxes[0][1],boxes[0][4],boxes[0][4]);
   drawBoxes();
   x+=1;
   requestAnimationFrame(update);
@@ -67,9 +64,7 @@ function drawBoxes() {
 		//update box position for next draw
 		boxes[i][0]+=boxes[i][2];
 		boxes[i][1]+=boxes[i][3];
-	}
-=======
-  speed: 1,
+	} 
 }
 
 let pressedKeys = [];
@@ -115,7 +110,6 @@ function playerMovement(player) {
   if (RIGHT && !UP && !DOWN) {
     player.x +=player.speed;
   }
->>>>>>> 2ceb1805d5b42cdb7831c55d52d4d46b0fdc5c1b
 }
 
 window.addEventListener("keydown", onKeyDown, false);
