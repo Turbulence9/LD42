@@ -1,0 +1,50 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"></head><body>
+	<canvas id="myCanvas" width="950" height="500" style="background-color: #000000; background-image: url(stars.jpg)"></canvas>
+	<audio controls="" autoplay="" loop="" style="display:none">
+		<source src="song.mp3" type="audio/ogg">
+	</audio>
+
+<div id="content">You have evaded 0 asteroids</div>
+<br>
+<script>
+window.addEventListener("keydown", onKeyDown, false);
+window.addEventListener("keyup", onKeyUp, false);
+
+function onKeyDown(event){
+  var keyCode = event.keyCode;
+  if(keyCode == 32) {
+
+  }
+  if(keyCode == 80) {
+
+  }
+  if(keyCode == 82) {
+
+  }
+}
+
+function onKeyUp(event){
+  var keyCode = event.keyCode;
+  if(keyCode == 32) {
+
+  }
+}
+function startOver() {
+window.addEventListener("keydown", onKeyDown, false);
+window.addEventListener("keyup", onKeyUp, false);
+setup();
+}
+function setup() {
+	var canvas = document.getElementById('myCanvas');
+	function draw() {
+	var picture = canvas.getContext('2d');
+	canvas.width = canvas.width;  
+	
+	window.requestAnimationFrame(draw);
+	};
+	window.requestAnimationFrame(draw);
+};
+window.onload = setup;
+</script>
+</body>
+</html>
