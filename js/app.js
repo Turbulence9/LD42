@@ -19,22 +19,31 @@ let forkLift = {
   dy: 0,
   collisionPt: 0
 }
+let fuel = {
+  frameCount: 0,
+  fuelsprSpd: 2,
+  fuelPercent: 100,
+}
 //boxes[0] = x coord, boxes[1] = y coord, boxes[2] = x vel, boxes[3] = y vel, boxes[4] = width, boxes[5] = color
 // boxes[6] rotation, boxes[7] corner 1, boxes[8] corner 2, boxes[9] corner3, boxes[10] corner 4, boxes[11] side1, 
 //boxes[12] side2, boxes[13] side3, boxes[14] side 4,
 var boxes = [];
-var x = 0;
+var frameCount = 0;
 
 function update() {
   canvas.width = canvas.width;
   drawRotatedImage(spr_forkLift,forkLift.x,forkLift.y,forkLift.angle);
   playerMovement(forkLift);
-  if(x == 0) {
-	spawnBoxes();
-	x+=1;
+  if(frameCount == 0) {
+  spawnBoxes();
+  }
+  frameCount+=1;
+  if (frameCount % fuel.fuelsprSpd == 0) {
+    fuel.frameCount++;
   }
   drawBoxes();
   boxCollision(forkLift);
+  drawUI();
   requestAnimationFrame(update);
 }
 
@@ -84,7 +93,7 @@ function boxCollision(player) {
 			var closestDist = Math.pow(boxes[i][0] - boxes[j][0], 2) + Math.pow(boxes[i][1] - boxes[j][1], 2);
 			for(k = 6; k < boxes[i].length - 4; k++) {
 				for(l = 10; l < boxes[j].length; l++) {
-					
+
 				}
 			}
 		}
@@ -175,27 +184,23 @@ function playerMovement(player) {
    ctx.fillRect(corners[2].x,corners[2].y,2,2);
   corners[3] = { x:corners[1].x + corners[2].x - corners[0].x ,y:corners[1].y + corners[2].y - corners[0].y };
   ctx.fillRect(corners[3].x,corners[3].y,2,2);*/
-	
-	
+
+
   let LEFT = pressedKeys.includes(37);
-  let UP = pressedKeys.includes(38);
   let RIGHT = pressedKeys.includes(39);
-  let DOWN = pressedKeys.includes(40);
+  let SPACE = pressedKeys.includes(32);
   var prevX = player.x;
   var prevY = player.y;
-  if (UP) {
+  if (SPACE && fuel.fuelPercent > 0) {
     player.x += Math.cos(player.angle*TO_RADIANS) * player.moveSpeed;
     player.y += Math.sin(player.angle*TO_RADIANS) * player.moveSpeed;
+    fuel.fuelPercent-=0.2;
   }
   if (LEFT) {
     player.angle -= player.angleSpeed;
   }
   if (RIGHT) {
     player.angle += player.angleSpeed;
-  }
-  if (DOWN) {
-    player.x -= Math.cos(player.angle*TO_RADIANS) * player.moveSpeed;
-    player.y -= Math.sin(player.angle*TO_RADIANS) * player.moveSpeed;
   }
   if(player.collisionPt.x > windowedWidth - 6) {
 	  player.x = prevX;
@@ -213,8 +218,30 @@ function drawRotatedImage(image, x, y, angle) {
 	ctx.save();
 	ctx.translate(x, y);
 	ctx.rotate(angle * TO_RADIANS);
-	ctx.drawImage(image,-(30),-(30));
-	ctx.restore();
+  ctx.drawImage(image, -(30), -(30));
+  ctx.fillRect( -10,-10,20,20);
+  ctx.restore();
+
+}
+
+function drawUI() {
+  ctx.fillStyle="#484848";
+  ctx.fillRect(0, 540, 1024, 100);
+  ctx.drawImage(spr_fuel,20, 560, 64, 64);
+  ctx.fillStyle="#000000";
+  ctx.fillRect(95, 563, 610, 58);
+  ctx.drawImage(spr_fuelMeter,(fuel.frameCount%16*600),0,600,48,100, 568, 600, 48);
+  ctx.beginPath();
+  ctx.moveTo(100, 568);
+  ctx.lineTo(130, 568);
+  ctx.lineTo(100, 598);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(670, 616);
+  ctx.lineTo(700, 616);
+  ctx.lineTo(700, 586);
+  ctx.fill();
+  ctx.fillRect(700, 568, -600*((100-fuel.fuelPercent)*0.01), 48);
 }
 
 window.addEventListener("keydown", onKeyDown, false);
