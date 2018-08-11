@@ -3,6 +3,7 @@ ctx = canvas.getContext("2d");
 let aspectRatio = 16/10;
 let windowedWidth = 1024;
 let windowedHeight = 640;
+let playerSize = 20;
 canvas.width = windowedWidth;
 canvas.height = windowedHeight;
 
@@ -14,6 +15,18 @@ let forkLift = {
 //boxes[0] = x coord, boxes[1] = y coord, boxes[2] = x vel, boxes[3] = y vel, boxes[4] = width, boxes[5] = color
 var boxes = [];
 var x = 0;
+
+function update() {
+  canvas.width = canvas.width;
+  ctx.fillRect(forkLift.x,forkLift.y,playerSize,playerSize);
+  playerMovement(forkLift);
+  if(x == 0) {
+  spawnBoxes();
+  }
+  drawBoxes();
+  x+=1;
+  requestAnimationFrame(update);
+}
 
 function boxCollision(box1, box2) {
 	
@@ -59,25 +72,13 @@ function drawBoxes() {
 
 let pressedKeys = [];
 
-function update() {
-  canvas.width = canvas.width;
-  ctx.fillRect(forkLift.x,forkLift.y,20,20);
-  playerMovement(forkLift);
-  requestAnimationFrame(update);
-  if(x % 2 == 0) {
-  spawnBoxes();
-  }
-  drawBoxes();
-  x+=1;
-  requestAnimationFrame(update);
-}
 
 function playerMovement(player) {
   let LEFT = pressedKeys.includes(37);
   let UP = pressedKeys.includes(38);
   let RIGHT = pressedKeys.includes(39);
   let DOWN = pressedKeys.includes(40);
-  let rootSpd = Math.sqrt(player.speed)
+  let rootSpd = 0.7071067811865 * player.speed;
   if (UP && !LEFT && !RIGHT) {
     player.y -=player.speed;
   }
@@ -105,6 +106,16 @@ function playerMovement(player) {
   }
   if (RIGHT && !UP && !DOWN) {
     player.x +=player.speed;
+  }
+  if(player.x > windowedWidth - playerSize) {
+	  player.x = windowedWidth - playerSize;
+  } else if(player.x < 0) {
+	  player.x = 0;
+  }
+  if(player.y > windowedHeight - playerSize) {
+	  player.y = windowedHeight - playerSize;
+  } else if(player.y < 0) {
+	  player.y = 0;
   }
 }
 
