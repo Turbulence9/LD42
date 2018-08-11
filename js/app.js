@@ -20,8 +20,8 @@ let forkLift = {
   collisionPt: 0
 }
 //boxes[0] = x coord, boxes[1] = y coord, boxes[2] = x vel, boxes[3] = y vel, boxes[4] = width, boxes[5] = color
-//boxes[6] corner 1, boxes[7] corner 2, boxes[8] corner3, boxes[9] corner 4, boxes[10] side1, boxes[11] side2
-//boxes[12] side3, boxes[13] side 4
+// boxes[6] rotation, boxes[7] corner 1, boxes[8] corner 2, boxes[9] corner3, boxes[10] corner 4, boxes[11] side1, 
+//boxes[12] side2, boxes[13] side3, boxes[14] side 4,
 var boxes = [];
 var x = 0;
 
@@ -55,25 +55,26 @@ function test() {
 
 //corners of player are (x, y),(x + width, y), (x, y + width), (x+ width, y + width)
 function boxCollision(player) {
-	var centerx = player.x + (playerSize / 2);
-	var centery = player.y + (playerSize / 2);
 	for(i = 0; i < boxes.length; i++) {
 		var boxCentx = boxes[i][0] + (boxes[i][4] / 2);
 		var boxCenty = boxes[i][1] + (boxes[i][4] / 2);
-		var xDiff = boxCentx - centerx;
-		var yDiff = boxCenty - centery;
-		if(Math.abs(xDiff) < ((boxes[i][4]+ playerSize) / 2) && Math.abs(yDiff) < ((boxes[i][4]+ playerSize) / 2)) {
+		var xDiff = boxCentx - player.collisionPt.x;
+		var yDiff = boxCenty - player.collisionPt.y;
+		var cDst = Math.sqrt(Math.pow(xDiff,2) + Math.pow(yDiff,2));
+		if(Math.abs(cDst) < ((boxes[i][4]+ 20) / 2) && Math.abs(yDiff) < ((boxes[i][4]+ 20) / 2)) {
 			//find the closest corner
-
-			var angle = Math.atan2(yDiff, xDiff);
-			if(Math.abs(angle) < 0.707) {
+			//var angle = Math.atan2(yDiff, xDiff);
+			/*if(Math.abs(angle) < 0.707) {
 				//boxes[i][2] = Math.cos(angle) * player.speed;
 			} else if(Math.abs(angle) > 2.356) {
 				//boxes[i][3] = Math.sin(angle) * player.speed;
 			} else {
 				//boxes[i][2] = Math.cos(angle) * player.speed;
 				//boxes[i][3] = Math.sin(angle) * player.speed;
-			}
+			}*/
+			boxes[i][6] = player.angle;
+			boxes[i][2] = Math.cos(player.angle* TO_RADIANS) * player.speed;
+			boxes[i][3] = Math.sin(player.angle* TO_RADIANS) * player.speed;
 		}
 	}
 	/*for(i = 0; i < boxes.length; i++) {
@@ -109,6 +110,7 @@ function spawnBoxes() {
 		newBox[2] = 0;
 		newBox[3] = 0;
 		newBox[5] = Math.round(Math.random()*3);
+		newBox[6] = 0;
 		boxes.push(newBox);
 	}
 }
@@ -122,7 +124,11 @@ function drawBoxes() {
 		} else {
 			ctx.fillStyle="#0000FF";
 		}
-		ctx.fillRect(boxes[i][0],boxes[i][1],boxes[i][4],boxes[i][4]);
+		ctx.save();
+		ctx.translate(boxes[i][0], boxes[i][1]);
+		ctx.rotate(boxes[i][6] * TO_RADIANS);
+		ctx.fillRect(0,0,boxes[i][4],boxes[i][4]);
+		ctx.restore();
 		//update box position for next draw
 		boxes[i][0]+=boxes[i][2];
 		boxes[i][1]+=boxes[i][3];
@@ -143,35 +149,20 @@ function drawBoxes() {
 		boxes[i][2] *= 0.8;
 		boxes[i][3] *= 0.8;
 		// corners
-		boxes[i][6] = {x:boxes[i][0], y:boxes[i][1]};
-		boxes[i][7] = {x:boxes[i][0] + boxes[i][4], y:boxes[i][1]};
-		boxes[i][8] = {x:boxes[i][0], y:boxes[i][1] + boxes[i][4]};
-		boxes[i][9] = {x:boxes[i][0] + boxes[i][4], y:boxes[i][1] + boxes[i][4]};
+		/*boxes[i][7] = {x:boxes[i][0], y:boxes[i][1]};
+		boxes[i][8] = {x:boxes[i][0] + boxes[i][4], y:boxes[i][1]};
+		boxes[i][9] = {x:boxes[i][0], y:boxes[i][1] + boxes[i][4]};
+		boxes[i][10] = {x:boxes[i][0] + boxes[i][4], y:boxes[i][1] + boxes[i][4]};
 		//sides
-		boxes[i][10] = {x:boxes[i][0], y:boxes[i][1] + (boxes[i][4] / 2)};
-		boxes[i][11] = {x:boxes[i][0] + (boxes[i][4] / 2), y:boxes[i][1]};
-		boxes[i][12] = {x:boxes[i][0] + (boxes[i][4] / 2), y:boxes[i][1] + boxes[i][4]};
-		boxes[i][13] = {x:boxes[i][0] + boxes[i][4], y:boxes[i][1] + (boxes[i][4] / 2)};
+		boxes[i][11] = {x:boxes[i][0], y:boxes[i][1] + (boxes[i][4] / 2)};
+		boxes[i][12] = {x:boxes[i][0] + (boxes[i][4] / 2), y:boxes[i][1]};
+		boxes[i][13] = {x:boxes[i][0] + (boxes[i][4] / 2), y:boxes[i][1] + boxes[i][4]};
+		boxes[i][14] = {x:boxes[i][0] + boxes[i][4], y:boxes[i][1] + (boxes[i][4] / 2)};*/
 	}
 }
 
 let pressedKeys = [];
 
-function drawPlayer(player) {
-	ctx.fillRect(player.x,player.y,playerSize,playerSize);
-	player.x += player.dx;
-	if(player.x > windowedWidth - playerSize) {
-	  player.x = windowedWidth - playerSize;
-	} else if(player.x < 0) {
-	  player.x = 0;
-	}
-	player.y += player.dy;
-	if(player.y > windowedHeight - playerSize) {
-	  player.y = windowedHeight - playerSize;
-	} else if(player.y < 0) {
-	  player.y = 0;
-	}
-}
 function playerMovement(player) {
 	player.collisionPt = {x:player.x + Math.cos(player.angle*TO_RADIANS )*30, y:player.y + Math.sin(player.angle*TO_RADIANS) * 30};
 	/*var corners = [];
