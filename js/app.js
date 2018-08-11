@@ -16,7 +16,7 @@ var boxes = [];
 var x = 0;
 
 function boxCollision(box1, box2) {
-	
+
 }
 
 function spawnBoxes() {
@@ -54,7 +54,7 @@ function drawBoxes() {
 		//update box position for next draw
 		boxes[i][0]+=boxes[i][2];
 		boxes[i][1]+=boxes[i][3];
-	} 
+	}
 }
 
 let pressedKeys = [];
@@ -63,8 +63,7 @@ function update() {
   canvas.width = canvas.width;
   ctx.fillRect(forkLift.x,forkLift.y,20,20);
   playerMovement(forkLift);
-  requestAnimationFrame(update);
-  if(x % 2 == 0) {
+  if(x == 0) {
   spawnBoxes();
   }
   drawBoxes();
@@ -77,7 +76,7 @@ function playerMovement(player) {
   let UP = pressedKeys.includes(38);
   let RIGHT = pressedKeys.includes(39);
   let DOWN = pressedKeys.includes(40);
-  let rootSpd = Math.sqrt(player.speed)
+  let rootSpd = player.speed * .707106781186;
   if (UP && !LEFT && !RIGHT) {
     player.y -=player.speed;
   }
