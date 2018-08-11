@@ -25,7 +25,7 @@ let fuel = {
   fuelPercent: 100,
 }
 //boxes[0] = x coord, boxes[1] = y coord, boxes[2] = x vel, boxes[3] = y vel, boxes[4] = width, boxes[5] = color
-// boxes[6] rotation, boxes[7] corner 1, boxes[8] corner 2, boxes[9] corner3, boxes[10] corner 4, boxes[11] side1, 
+// boxes[6] rotation, boxes[7] corner 1, boxes[8] corner 2, boxes[9] corner3, boxes[10] corner 4, boxes[11] side1,
 //boxes[12] side2, boxes[13] side3, boxes[14] side 4,
 var boxes = [];
 var frameCount = 0;
@@ -82,8 +82,8 @@ function boxCollision(player) {
 				//boxes[i][3] = Math.sin(angle) * player.speed;
 			}*/
 			boxes[i][6] = player.angle;
-			boxes[i][2] = Math.cos(player.angle* TO_RADIANS) * player.speed;
-			boxes[i][3] = Math.sin(player.angle* TO_RADIANS) * player.speed;
+			boxes[i][2] = Math.cos(player.angle* TO_RADIANS) * player.moveSpeed;
+			boxes[i][3] = Math.sin(player.angle* TO_RADIANS) * player.moveSpeed;
 		}
 	}
 	/*for(i = 0; i < boxes.length; i++) {
