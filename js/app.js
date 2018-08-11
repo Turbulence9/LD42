@@ -15,6 +15,8 @@ let forkLift = {
   speed: 9
 }
 //boxes[0] = x coord, boxes[1] = y coord, boxes[2] = x vel, boxes[3] = y vel, boxes[4] = width, boxes[5] = color
+//boxes[6] corner 1, boxes[7] corner 2, boxes[8] corner3, boxes[9] corner 4, boxes[10] side1, boxes[11] side2
+//boxes[12] side3, boxes[13] side 4
 var boxes = [];
 var x = 0;
 
@@ -24,8 +26,8 @@ function update() {
   drawPlayer(forkLift);
   playerMovement(forkLift);
   if(x == 0) {
-  spawnBoxes();
-  x+=1;
+	spawnBoxes();
+	x+=1;
   }
   drawBoxes();
   boxCollision(forkLift);
@@ -70,6 +72,20 @@ function boxCollision(player) {
 			}
 		}
 	}
+	for(i = 0; i < boxes.length; i++) {
+		for(j = 1; j < boxes.length; j++) {
+			var closestCorner = 0;
+			var closestSide = 0;
+			var closestDist = Math.pow(boxes[i][0] - boxes[j][0], 2) + Math.pow(boxes[i][1] - boxes[j][1], 2);
+			for(k = 6; k < boxes[i].length - 4; k++) {
+				for(l = 10; l < boxes[j].length; l++) {
+					
+				}
+			}
+			//check each corner on box i with 3 corners on box j
+			//corner 1 check	
+		}
+	}
 }
 
 function spawnBoxes() {
@@ -86,7 +102,8 @@ function spawnBoxes() {
 		var newBox = [];
 		newBox[0] = Math.round(Math.random()*(xMax - xMin)) + xMin;
 		newBox[1] = Math.round(Math.random()*(yMax - yMin)) + yMin;
-		newBox[4] = Math.round(Math.random()*(wMax - wMin)) + wMin;
+		//newBox[4] = Math.round(Math.random()*(wMax - wMin)) + wMin;
+		newBox[4] = 15;
 		newBox[2] = 0;
 		newBox[3] = 0;
 		newBox[5] = Math.round(Math.random()*3);
@@ -107,8 +124,32 @@ function drawBoxes() {
 		//update box position for next draw
 		boxes[i][0]+=boxes[i][2];
 		boxes[i][1]+=boxes[i][3];
+		if(boxes[i][0] > windowedWidth - playerSize) {
+			boxes[i][0] = windowedWidth - boxes[i][4];
+			boxes[i][2] = 0;
+		} else if(boxes[i][0] < 0) {
+			boxes[i][0] = 0;
+			boxes[i][2] = 0;
+		}
+		if(boxes[i][1] > windowedHeight - playerSize) {
+			boxes[i][1] = windowedWidth - boxes[i][4];
+			boxes[i][3] = 0;
+		} else if(boxes[i][1] < 0) {
+			boxes[i][1] = 0;
+			boxes[i][3] = 0;
+		}
 		boxes[i][2] *= 0.8;
 		boxes[i][3] *= 0.8;
+		// corners
+		boxes[i][6] = {x:boxes[i][0], y:boxes[i][1]};
+		boxes[i][7] = {x:boxes[i][0] + boxes[i][4], y:boxes[i][1]};
+		boxes[i][8] = {x:boxes[i][0], y:boxes[i][1] + boxes[i][4]};
+		boxes[i][9] = {x:boxes[i][0] + boxes[i][4], y:boxes[i][1] + boxes[i][4]};
+		//sides
+		boxes[i][10] = {x:boxes[i][0], y:boxes[i][1] + (boxes[i][4] / 2)};
+		boxes[i][11] = {x:boxes[i][0] + (boxes[i][4] / 2), y:boxes[i][1]};
+		boxes[i][12] = {x:boxes[i][0] + (boxes[i][4] / 2), y:boxes[i][1] + boxes[i][4]};
+		boxes[i][13] = {x:boxes[i][0] + boxes[i][4], y:boxes[i][1] + (boxes[i][4] / 2)};
 	}
 }
 
