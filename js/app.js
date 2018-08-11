@@ -3,14 +3,17 @@ ctx = canvas.getContext("2d");
 let aspectRatio = 16/10;
 let windowedWidth = 1024;
 let windowedHeight = 640;
-let playerSize = 20;
 canvas.width = windowedWidth;
 canvas.height = windowedHeight;
+let TO_RADIANS = Math.PI/180;
 
 let forkLift = {
   x: 200,
   y: 200,
-  speed: 9
+  angle: 0,
+  moveSpeed: 9,
+  angleSpeed: 4,
+  size: 60,
 }
 //boxes[0] = x coord, boxes[1] = y coord, boxes[2] = x vel, boxes[3] = y vel, boxes[4] = width, boxes[5] = color
 var boxes = [];
@@ -18,7 +21,7 @@ var x = 0;
 
 function update() {
   canvas.width = canvas.width;
-  ctx.fillRect(forkLift.x,forkLift.y,playerSize,playerSize);
+  drawRotatedImage(spr_forkLift,forkLift.x,forkLift.y,forkLift.angle);
   playerMovement(forkLift);
   if(x == 0) {
   spawnBoxes();
@@ -77,45 +80,38 @@ function playerMovement(player) {
   let UP = pressedKeys.includes(38);
   let RIGHT = pressedKeys.includes(39);
   let DOWN = pressedKeys.includes(40);
-  let rootSpd = 0.7071067811865 * player.speed;
-  if (UP && !LEFT && !RIGHT) {
-    player.y -=player.speed;
+  if (UP) {
+    player.x += Math.cos(player.angle*TO_RADIANS) * player.moveSpeed;
+    player.y += Math.sin(player.angle*TO_RADIANS) * player.moveSpeed;
   }
-  if (UP && LEFT) {
-    player.y -= rootSpd;
-    player.x -= rootSpd;
+  if (LEFT) {
+    player.angle -= player.angleSpeed;
   }
-  if (UP && RIGHT) {
-    player.y -= rootSpd;
-    player.x += rootSpd;
+  if (RIGHT) {
+    player.angle += player.angleSpeed;
   }
-  if (DOWN && !LEFT && !RIGHT) {
-    player.y +=player.speed;
+  if (DOWN) {
+    player.x -= Math.cos(player.angle*TO_RADIANS) * player.moveSpeed;
+    player.y -= Math.sin(player.angle*TO_RADIANS) * player.moveSpeed;
   }
-  if (DOWN && LEFT) {
-    player.y += rootSpd;
-    player.x -= rootSpd;
-  }
-  if (DOWN && RIGHT) {
-    player.y += rootSpd;
-    player.x += rootSpd;
-  }
-  if (LEFT && !UP && !DOWN) {
-    player.x -=player.speed;
-  }
-  if (RIGHT && !UP && !DOWN) {
-    player.x +=player.speed;
-  }
-  if(player.x > windowedWidth - playerSize) {
-	  player.x = windowedWidth - playerSize;
+  if(player.x > windowedWidth - player.size) {
+	  player.x = windowedWidth - player.size;
   } else if(player.x < 0) {
 	  player.x = 0;
   }
-  if(player.y > windowedHeight - playerSize) {
-	  player.y = windowedHeight - playerSize;
+  if(player.y > windowedHeight - player.size) {
+	  player.y = windowedHeight - player.size;
   } else if(player.y < 0) {
 	  player.y = 0;
   }
+}
+
+function drawRotatedImage(image, x, y, angle) {
+	ctx.save();
+	ctx.translate(x, y);
+	ctx.rotate(angle * TO_RADIANS);
+	ctx.drawImage(image, -(30), -(30));
+	ctx.restore();
 }
 
 window.addEventListener("keydown", onKeyDown, false);
