@@ -12,11 +12,12 @@ let forkLift = {
   x: 200,
   y: 200,
   angle: 0,
-  moveSpeed: 9,
+  moveSpeed: 6,
   angleSpeed: 4,
   size: 60,
   dx: 0,
   dy: 0,
+  collisionPt: 0
 }
 //boxes[0] = x coord, boxes[1] = y coord, boxes[2] = x vel, boxes[3] = y vel, boxes[4] = width, boxes[5] = color
 //boxes[6] corner 1, boxes[7] corner 2, boxes[8] corner3, boxes[9] corner 4, boxes[10] side1, boxes[11] side2
@@ -27,7 +28,6 @@ var x = 0;
 function update() {
   canvas.width = canvas.width;
   drawRotatedImage(spr_forkLift,forkLift.x,forkLift.y,forkLift.angle);
-  //drawPlayer(forkLift);
   playerMovement(forkLift);
   if(x == 0) {
 	spawnBoxes();
@@ -67,16 +67,16 @@ function boxCollision(player) {
 
 			var angle = Math.atan2(yDiff, xDiff);
 			if(Math.abs(angle) < 0.707) {
-				boxes[i][2] = Math.cos(angle) * player.speed;
+				//boxes[i][2] = Math.cos(angle) * player.speed;
 			} else if(Math.abs(angle) > 2.356) {
-				boxes[i][3] = Math.sin(angle) * player.speed;
+				//boxes[i][3] = Math.sin(angle) * player.speed;
 			} else {
-				boxes[i][2] = Math.cos(angle) * player.speed;
-				boxes[i][3] = Math.sin(angle) * player.speed;
+				//boxes[i][2] = Math.cos(angle) * player.speed;
+				//boxes[i][3] = Math.sin(angle) * player.speed;
 			}
 		}
 	}
-	for(i = 0; i < boxes.length; i++) {
+	/*for(i = 0; i < boxes.length; i++) {
 		for(j = 1; j < boxes.length; j++) {
 			var closestCorner = 0;
 			var closestSide = 0;
@@ -86,10 +86,8 @@ function boxCollision(player) {
 					
 				}
 			}
-			//check each corner on box i with 3 corners on box j
-			//corner 1 check	
 		}
-	}
+	}*/
 }
 
 function spawnBoxes() {
@@ -107,7 +105,7 @@ function spawnBoxes() {
 		newBox[0] = Math.round(Math.random()*(xMax - xMin)) + xMin;
 		newBox[1] = Math.round(Math.random()*(yMax - yMin)) + yMin;
 		//newBox[4] = Math.round(Math.random()*(wMax - wMin)) + wMin;
-		newBox[4] = 15;
+		newBox[4] = 16;
 		newBox[2] = 0;
 		newBox[3] = 0;
 		newBox[5] = Math.round(Math.random()*3);
@@ -174,12 +172,26 @@ function drawPlayer(player) {
 	  player.y = 0;
 	}
 }
-
 function playerMovement(player) {
+	player.collisionPt = {x:player.x + Math.cos(player.angle*TO_RADIANS )*30, y:player.y + Math.sin(player.angle*TO_RADIANS) * 30};
+	/*var corners = [];
+   ctx.fillStyle="#FF0000";
+  corners[0] = {x:player.x, y:player.y};
+  ctx.fillRect(corners[0].x,corners[0].y,2,2);
+  corners[1] = {x:player.x + Math.cos(player.angle*TO_RADIANS )*40, y:player.y + Math.sin(player.angle*TO_RADIANS) * 40};
+  ctx.fillRect(corners[1].x,corners[1].y,2,2);
+  corners[2] = {x:player.x + -Math.cos((90 - player.angle)*TO_RADIANS )*20, y:player.y + Math.sin((90 - player.angle)*TO_RADIANS )*20};
+   ctx.fillRect(corners[2].x,corners[2].y,2,2);
+  corners[3] = { x:corners[1].x + corners[2].x - corners[0].x ,y:corners[1].y + corners[2].y - corners[0].y };
+  ctx.fillRect(corners[3].x,corners[3].y,2,2);*/
+	
+	
   let LEFT = pressedKeys.includes(37);
   let UP = pressedKeys.includes(38);
   let RIGHT = pressedKeys.includes(39);
   let DOWN = pressedKeys.includes(40);
+  var prevX = player.x;
+  var prevY = player.y;
   if (UP) {
     player.x += Math.cos(player.angle*TO_RADIANS) * player.moveSpeed;
     player.y += Math.sin(player.angle*TO_RADIANS) * player.moveSpeed;
@@ -194,15 +206,15 @@ function playerMovement(player) {
     player.x -= Math.cos(player.angle*TO_RADIANS) * player.moveSpeed;
     player.y -= Math.sin(player.angle*TO_RADIANS) * player.moveSpeed;
   }
-  if(player.x > windowedWidth - player.size) {
-	  player.x = windowedWidth - player.size;
-  } else if(player.x < 0) {
-	  player.x = 0;
+  if(player.collisionPt.x > windowedWidth - 6) {
+	  player.x = prevX;
+  } else if(player.collisionPt.x < 6) {
+	  player.x = prevX;
   }
-  if(player.y > windowedHeight - player.size) {
-	  player.y = windowedHeight - player.size;
-  } else if(player.y < 0) {
-	  player.y = 0;
+  if(player.collisionPt.y > windowedHeight - 6) {
+	  player.y = prevY;
+  } else if(player.collisionPt.y < 6) {
+	  player.y = prevY;
   }
 }
 
@@ -210,7 +222,7 @@ function drawRotatedImage(image, x, y, angle) {
 	ctx.save();
 	ctx.translate(x, y);
 	ctx.rotate(angle * TO_RADIANS);
-	ctx.drawImage(image, -(30), -(30));
+	ctx.drawImage(image,-(30),-(30));
 	ctx.restore();
 }
 
