@@ -10,6 +10,8 @@ canvas.height = windowedHeight;
 let forkLift = {
   x: 200,
   y: 200,
+  dx: 0,
+  dy: 0,
   speed: 9
 }
 //boxes[0] = x coord, boxes[1] = y coord, boxes[2] = x vel, boxes[3] = y vel, boxes[4] = width, boxes[5] = color
@@ -18,18 +20,56 @@ var x = 0;
 
 function update() {
   canvas.width = canvas.width;
-  ctx.fillRect(forkLift.x,forkLift.y,playerSize,playerSize);
+  //test();
+  drawPlayer(forkLift);
   playerMovement(forkLift);
   if(x == 0) {
   spawnBoxes();
+  x+=1;
   }
   drawBoxes();
-  x+=1;
+  boxCollision(forkLift);
   requestAnimationFrame(update);
 }
 
-function boxCollision(box1, box2) {
+function test() {
+	var temp = Math.atan2(5, 5);
+	var	tempo =  Math.sin(temp) * forkLift.speed;
+	//alert("both pos" + tempo);
+	temp = Math.atan2(5, -5);
+	tempo = Math.sin(temp) * forkLift.speed;
+	//alert("x neg" + tempo);
+	temp = Math.atan2(-5, 5);
+	tempo = Math.sin(temp) * forkLift.speed;
+	//alert("y neg" + tempo);
+	temp = Math.atan2(-5, -5);
+	tempo = Math.sin(temp) * forkLift.speed;
+	//alert("both neg" + tempo);
+}
 
+//corners of player are (x, y),(x + width, y), (x, y + width), (x+ width, y + width)
+function boxCollision(player) {
+	var centerx = player.x + (playerSize / 2);
+	var centery = player.y + (playerSize / 2);
+	for(i = 0; i < boxes.length; i++) {
+		var boxCentx = boxes[i][0] + (boxes[i][4] / 2);
+		var boxCenty = boxes[i][1] + (boxes[i][4] / 2);
+		var xDiff = boxCentx - centerx;
+		var yDiff = boxCenty - centery;
+		if(Math.abs(xDiff) < ((boxes[i][4]+ playerSize) / 2) && Math.abs(yDiff) < ((boxes[i][4]+ playerSize) / 2)) {
+			//find the closest corner
+			
+			var angle = Math.atan2(yDiff, xDiff);
+			if(Math.abs(angle) < 0.707) {
+				boxes[i][2] = Math.cos(angle) * player.speed;
+			} else if(Math.abs(angle) > 2.356) {
+				boxes[i][3] = Math.sin(angle) * player.speed;
+			} else {
+				boxes[i][2] = Math.cos(angle) * player.speed;
+				boxes[i][3] = Math.sin(angle) * player.speed;
+			}
+		}
+	}
 }
 
 function spawnBoxes() {
@@ -67,10 +107,28 @@ function drawBoxes() {
 		//update box position for next draw
 		boxes[i][0]+=boxes[i][2];
 		boxes[i][1]+=boxes[i][3];
+		boxes[i][2] *= 0.8;
+		boxes[i][3] *= 0.8;
 	}
 }
 
 let pressedKeys = [];
+
+function drawPlayer(player) {
+	ctx.fillRect(player.x,player.y,playerSize,playerSize);
+	player.x += player.dx;
+	if(player.x > windowedWidth - playerSize) {
+	  player.x = windowedWidth - playerSize;
+	} else if(player.x < 0) {
+	  player.x = 0;
+	}
+	player.y += player.dy;
+	if(player.y > windowedHeight - playerSize) {
+	  player.y = windowedHeight - playerSize;
+	} else if(player.y < 0) {
+	  player.y = 0;
+	}
+}
 
 function playerMovement(player) {
   let LEFT = pressedKeys.includes(37);
@@ -78,43 +136,35 @@ function playerMovement(player) {
   let RIGHT = pressedKeys.includes(39);
   let DOWN = pressedKeys.includes(40);
   let rootSpd = 0.7071067811865 * player.speed;
+  player.dy = 0;
+  player.dx = 0;
   if (UP && !LEFT && !RIGHT) {
-    player.y -=player.speed;
+	player.dy = -player.speed;
   }
   if (UP && LEFT) {
-    player.y -= rootSpd;
-    player.x -= rootSpd;
+	player.dy = -rootSpd;
+    player.dx = -rootSpd;
   }
   if (UP && RIGHT) {
-    player.y -= rootSpd;
-    player.x += rootSpd;
+    player.dy = -rootSpd;
+    player.dx = rootSpd;
   }
   if (DOWN && !LEFT && !RIGHT) {
-    player.y +=player.speed;
+    player.dy = player.speed;
   }
   if (DOWN && LEFT) {
-    player.y += rootSpd;
-    player.x -= rootSpd;
+    player.dy = rootSpd;
+    player.dx = -rootSpd;
   }
   if (DOWN && RIGHT) {
-    player.y += rootSpd;
-    player.x += rootSpd;
+    player.dy = rootSpd;
+    player.dx = rootSpd;
   }
   if (LEFT && !UP && !DOWN) {
-    player.x -=player.speed;
+    player.dx = -player.speed;
   }
   if (RIGHT && !UP && !DOWN) {
-    player.x +=player.speed;
-  }
-  if(player.x > windowedWidth - playerSize) {
-	  player.x = windowedWidth - playerSize;
-  } else if(player.x < 0) {
-	  player.x = 0;
-  }
-  if(player.y > windowedHeight - playerSize) {
-	  player.y = windowedHeight - playerSize;
-  } else if(player.y < 0) {
-	  player.y = 0;
+    player.dx = player.speed;
   }
 }
 
