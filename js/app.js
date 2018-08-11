@@ -12,27 +12,36 @@ let forkLift = {
   x: 200,
   y: 200,
   angle: 0,
-  moveSpeed: 9,
+  moveSpeed: 6,
   angleSpeed: 4,
   size: 60,
   dx: 0,
   dy: 0,
 }
-//boxes[0] = x coord, boxes[1] = y coord, boxes[2] = x vel, boxes[3] = y vel, boxes[4] = width, boxes[5] = color
+
+let fuel = {
+  frameCount: 0,
+  fuelsprSpd: 2,
+  fuelPercent: 100,
+}
 var boxes = [];
-var x = 0;
+var frameCount = 0;
 
 function update() {
   canvas.width = canvas.width;
   drawRotatedImage(spr_forkLift,forkLift.x,forkLift.y,forkLift.angle);
   //drawPlayer(forkLift);
   playerMovement(forkLift);
-  if(x == 0) {
+  if(frameCount == 0) {
   spawnBoxes();
-  x+=1;
+  }
+  frameCount+=1;
+  if (frameCount % fuel.fuelsprSpd == 0) {
+    fuel.frameCount++;
   }
   drawBoxes();
   boxCollision(forkLift);
+  drawUI();
   requestAnimationFrame(update);
 }
 
@@ -136,22 +145,18 @@ function drawPlayer(player) {
 
 function playerMovement(player) {
   let LEFT = pressedKeys.includes(37);
-  let UP = pressedKeys.includes(38);
   let RIGHT = pressedKeys.includes(39);
-  let DOWN = pressedKeys.includes(40);
-  if (UP) {
+  let SPACE = pressedKeys.includes(32);
+  if (SPACE && fuel.fuelPercent > 0) {
     player.x += Math.cos(player.angle*TO_RADIANS) * player.moveSpeed;
     player.y += Math.sin(player.angle*TO_RADIANS) * player.moveSpeed;
+    fuel.fuelPercent-=0.2;
   }
   if (LEFT) {
     player.angle -= player.angleSpeed;
   }
   if (RIGHT) {
     player.angle += player.angleSpeed;
-  }
-  if (DOWN) {
-    player.x -= Math.cos(player.angle*TO_RADIANS) * player.moveSpeed;
-    player.y -= Math.sin(player.angle*TO_RADIANS) * player.moveSpeed;
   }
   if(player.x > windowedWidth - player.size) {
 	  player.x = windowedWidth - player.size;
@@ -169,8 +174,30 @@ function drawRotatedImage(image, x, y, angle) {
 	ctx.save();
 	ctx.translate(x, y);
 	ctx.rotate(angle * TO_RADIANS);
-	ctx.drawImage(image, -(30), -(30));
-	ctx.restore();
+  ctx.drawImage(image, -(30), -(30));
+  ctx.fillRect( -10,-10,20,20);
+  ctx.restore();
+
+}
+
+function drawUI() {
+  ctx.fillStyle="#484848";
+  ctx.fillRect(0, 540, 1024, 100);
+  ctx.drawImage(spr_fuel,20, 560, 64, 64);
+  ctx.fillStyle="#000000";
+  ctx.fillRect(95, 563, 610, 58);
+  ctx.drawImage(spr_fuelMeter,(fuel.frameCount%16*600),0,600,48,100, 568, 600, 48);
+  ctx.beginPath();
+  ctx.moveTo(100, 568);
+  ctx.lineTo(130, 568);
+  ctx.lineTo(100, 598);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(670, 616);
+  ctx.lineTo(700, 616);
+  ctx.lineTo(700, 586);
+  ctx.fill();
+  ctx.fillRect(700, 568, -600*((100-fuel.fuelPercent)*0.01), 48);
 }
 
 window.addEventListener("keydown", onKeyDown, false);
