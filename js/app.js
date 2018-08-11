@@ -6,6 +6,7 @@ let windowedHeight = 640;
 canvas.width = windowedWidth;
 canvas.height = windowedHeight;
 let TO_RADIANS = Math.PI/180;
+let playerSize = 60;
 
 let forkLift = {
   x: 200,
@@ -14,6 +15,8 @@ let forkLift = {
   moveSpeed: 9,
   angleSpeed: 4,
   size: 60,
+  dx: 0,
+  dy: 0,
 }
 //boxes[0] = x coord, boxes[1] = y coord, boxes[2] = x vel, boxes[3] = y vel, boxes[4] = width, boxes[5] = color
 var boxes = [];
@@ -22,17 +25,55 @@ var x = 0;
 function update() {
   canvas.width = canvas.width;
   drawRotatedImage(spr_forkLift,forkLift.x,forkLift.y,forkLift.angle);
+  //drawPlayer(forkLift);
   playerMovement(forkLift);
   if(x == 0) {
   spawnBoxes();
+  x+=1;
   }
   drawBoxes();
-  x+=1;
+  boxCollision(forkLift);
   requestAnimationFrame(update);
 }
 
-function boxCollision(box1, box2) {
+function test() {
+	var temp = Math.atan2(5, 5);
+	var	tempo =  Math.sin(temp) * forkLift.speed;
+	//alert("both pos" + tempo);
+	temp = Math.atan2(5, -5);
+	tempo = Math.sin(temp) * forkLift.speed;
+	//alert("x neg" + tempo);
+	temp = Math.atan2(-5, 5);
+	tempo = Math.sin(temp) * forkLift.speed;
+	//alert("y neg" + tempo);
+	temp = Math.atan2(-5, -5);
+	tempo = Math.sin(temp) * forkLift.speed;
+	//alert("both neg" + tempo);
+}
 
+//corners of player are (x, y),(x + width, y), (x, y + width), (x+ width, y + width)
+function boxCollision(player) {
+	var centerx = player.x + (playerSize / 2);
+	var centery = player.y + (playerSize / 2);
+	for(i = 0; i < boxes.length; i++) {
+		var boxCentx = boxes[i][0] + (boxes[i][4] / 2);
+		var boxCenty = boxes[i][1] + (boxes[i][4] / 2);
+		var xDiff = boxCentx - centerx;
+		var yDiff = boxCenty - centery;
+		if(Math.abs(xDiff) < ((boxes[i][4]+ playerSize) / 2) && Math.abs(yDiff) < ((boxes[i][4]+ playerSize) / 2)) {
+			//find the closest corner
+
+			var angle = Math.atan2(yDiff, xDiff);
+			if(Math.abs(angle) < 0.707) {
+				boxes[i][2] = Math.cos(angle) * player.speed;
+			} else if(Math.abs(angle) > 2.356) {
+				boxes[i][3] = Math.sin(angle) * player.speed;
+			} else {
+				boxes[i][2] = Math.cos(angle) * player.speed;
+				boxes[i][3] = Math.sin(angle) * player.speed;
+			}
+		}
+	}
 }
 
 function spawnBoxes() {
@@ -70,10 +111,28 @@ function drawBoxes() {
 		//update box position for next draw
 		boxes[i][0]+=boxes[i][2];
 		boxes[i][1]+=boxes[i][3];
+		boxes[i][2] *= 0.8;
+		boxes[i][3] *= 0.8;
 	}
 }
 
 let pressedKeys = [];
+
+function drawPlayer(player) {
+	ctx.fillRect(player.x,player.y,playerSize,playerSize);
+	player.x += player.dx;
+	if(player.x > windowedWidth - playerSize) {
+	  player.x = windowedWidth - playerSize;
+	} else if(player.x < 0) {
+	  player.x = 0;
+	}
+	player.y += player.dy;
+	if(player.y > windowedHeight - playerSize) {
+	  player.y = windowedHeight - playerSize;
+	} else if(player.y < 0) {
+	  player.y = 0;
+	}
+}
 
 function playerMovement(player) {
   let LEFT = pressedKeys.includes(37);
