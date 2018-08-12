@@ -232,8 +232,8 @@ function drawBoxes() {
 let pressedKeys = [];
 
 function playerMovement(player) {
-	player.collisionPt = {x:player.x + Math.cos(player.angle*TO_RADIANS )*30, y:player.y + Math.sin(player.angle*TO_RADIANS) * 30};
-	player.collisionBox = {x:player.x + Math.cos(player.angle*TO_RADIANS )*20, y:player.y + Math.sin(player.angle*TO_RADIANS) * 20};
+	player.collisionPt = {x:player.x + Math.cos(player.angle*TO_RADIANS )*playerSize/2, y:player.y + Math.sin(player.angle*TO_RADIANS) * playerSize/2};
+	player.collisionBox = {x:player.x + Math.cos(player.angle*TO_RADIANS )*playerSize/3, y:player.y + Math.sin(player.angle*TO_RADIANS) * playerSize/3};
 	/*var corners = [];
    ctx.fillStyle="#FF0000";
   corners[0] = {x:player.x, y:player.y};
@@ -278,7 +278,7 @@ function drawRotatedImage(image, x, y, angle) {
 	ctx.save();
 	ctx.translate(x, y);
 	ctx.rotate(angle * TO_RADIANS);
-  ctx.drawImage(image, -(30), -(30));
+  ctx.drawImage(image, -(playerSize/2), -(playerSize/2));
   ctx.restore();
 
 }
