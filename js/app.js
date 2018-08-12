@@ -75,16 +75,10 @@ function test() {
 //corners of player are (x, y),(x + width, y), (x, y + width), (x+ width, y + width)
 function boxCollision(player) {
 	for(i = 0; i < boxes.length; i++) {
-		var boxCentx = boxes[i].x;
-		var boxCenty = boxes[i].y;
 		//cDst for circle hitbox
-		var xDiff = boxCentx - player.collisionBox.x;
-		var yDiff = boxCenty - player.collisionBox.y;
+		var xDiff = boxes[i].x - player.collisionBox.x;
+		var yDiff = boxes[i].y - player.collisionBox.y;
 		var cDst = Math.sqrt(Math.pow(xDiff,2) + Math.pow(yDiff,2));
-		/*ctx.beginPath();
-		ctx.fillStyle="00FF00";
-		ctx.arc( player.collisionBox.x, player.collisionBox.y,(boxes[i].width+ 10) / 2,0,2*Math.PI);
-		ctx.fill();*/
 		
 		if(cDst < ((boxes[i].width) / 2)) {	
 			boxes[i].rotation = player.angle;
