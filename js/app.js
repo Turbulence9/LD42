@@ -74,18 +74,19 @@ function test() {
 
 //corners of player are (x, y),(x + width, y), (x, y + width), (x+ width, y + width)
 function boxCollision(player) {
+	var splicer = [];
 	for(i = 0; i < boxes.length; i++) {
 		//cDst for circle hitbox
 		var xDiff = boxes[i].x - player.collisionBox.x;
 		var yDiff = boxes[i].y - player.collisionBox.y;
 		var cDst = Math.sqrt(Math.pow(xDiff,2) + Math.pow(yDiff,2));
-		if(cDst < boxes[i].width) {	
+		if(cDst < 20) {	
 			boxes[i].rotation = player.angle;
 			boxes[i].xvel = Math.cos(player.angle* TO_RADIANS) * player.moveSpeed;
 			boxes[i].yvel = Math.sin(player.angle* TO_RADIANS) * player.moveSpeed;
 		}
 		//rectangle hitbox	
-		for(j = 1; j < boxes.length; j++) {
+		for(j = 0; j < boxes.length; j++) {
 			var b2bDist = Math.pow(boxes[i].x - boxes[j].x, 2) + Math.pow(boxes[i].y - boxes[j].y, 2);
 			if(b2bDist < 2.0*(boxes[i].width + boxes[j].width) && i != j) {
 				if(boxes[i].color == boxes[j].color) {
@@ -95,15 +96,14 @@ function boxCollision(player) {
 					} else {
 						boxes[i].width += boxes[j].width / 4;
 					}
-					boxes.splice(j, 1);
-					j--;
+					splicer.push(j);
 				} else {
 				var iBoxSpeed = Math.sqrt(Math.pow(boxes[i].xvel , 2) + Math.pow(boxes[i].yvel, 2));
 				var jBoxSpeed = Math.sqrt(Math.pow(boxes[j].xvel , 2) + Math.pow(boxes[j].yvel, 2));
 				if(jBoxSpeed < 1 && iBoxSpeed < 1) {
 					boxes[i].idleLock++;
 					boxes[j].idleLock++;
-					if(boxes[i].idleLock > 20 || boxes[j].idleLock > 20) {
+					if(boxes[i].idleLock > 10 || boxes[j].idleLock > 10) {
 						var xSign = Math.round(Math.random()) * 2 - 1
 						var xSign = Math.round(Math.random()) * 2 - 1
 						boxes[i].x += 6.6*xSign;
@@ -138,7 +138,9 @@ function boxCollision(player) {
 			}
 		}
 	}
-
+	for(i = splicer.length - 1; i >= 0; i--) {
+		boxes.splice(splicer[i], 1);
+	}
 }
 
 function spawnBoxes() {
@@ -177,13 +179,12 @@ function drawBoxes() {
 		ctx.save();
 		ctx.translate(boxes[i].x, boxes[i].y);
 		ctx.rotate(boxes[i].rotation * TO_RADIANS);
-		ctx.scale(boxes[i].width / smallestBox,boxes[i].width / smallestBox)
 		if(boxes[i].color == 0) {
-			ctx.drawImage(spr_blueBox, -(boxes[i].width / 2), -(boxes[i].width / 2));
+			ctx.drawImage(spr_blueBox, -(boxes[i].width / 2), -(boxes[i].width / 2), boxes[i].width, boxes[i].width);
 		} else if(boxes[i].color == 1) {
-			ctx.drawImage(spr_greenBox, -(boxes[i].width / 2), -(boxes[i].width / 2));
+			ctx.drawImage(spr_greenBox, -(boxes[i].width / 2), -(boxes[i].width / 2), boxes[i].width, boxes[i].width);
 		} else {
-			ctx.drawImage(spr_redBox, -(boxes[i].width / 2), -(boxes[i].width / 2));
+			ctx.drawImage(spr_redBox, -(boxes[i].width / 2), -(boxes[i].width / 2), boxes[i].width, boxes[i].width);
 		}
 		ctx.restore();
 		//update box position for next draw
@@ -251,7 +252,7 @@ function playerMovement(player) {
   if (SPACE && fuel.fuelPercent > 0) {
     player.x += Math.cos(player.angle*TO_RADIANS) * player.moveSpeed;
     player.y += Math.sin(player.angle*TO_RADIANS) * player.moveSpeed;
-    fuel.fuelPercent-=0.075;
+    fuel.fuelPercent-=0;
   }
   if (LEFT) {
     player.angle -= player.angleSpeed;
