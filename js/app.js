@@ -44,7 +44,7 @@ function update() {
   canvas.width = canvas.width;
   drawRotatedImage(spr_forkLift,forkLift.x,forkLift.y,forkLift.angle);
   playerMovement(forkLift);
-  if(frameCount == 0) {
+  if(frameCount % 100 == 0) {
   spawnBoxes();
   }
   frameCount+=1;
@@ -91,19 +91,54 @@ function boxCollision(player) {
 			boxes[i].xvel = Math.cos(player.angle* TO_RADIANS) * player.moveSpeed;
 			boxes[i].yvel = Math.sin(player.angle* TO_RADIANS) * player.moveSpeed;
 		}
-	}
-	/*for(i = 0; i < boxes.length; i++) {
+		
 		for(j = 1; j < boxes.length; j++) {
-			var closestCorner = 0;
-			var closestSide = 0;
-			var closestDist = Math.pow(boxes[i].x - boxes[j][0], 2) + Math.pow(boxes[i].y - boxes[j][1], 2);
-			for(k = 6; k < boxes[i].length - 4; k++) {
-				for(l = 10; l < boxes[j].length; l++) {
-
+			var b2bDist = Math.pow(boxes[i].x - boxes[j].x, 2) + Math.pow(boxes[i].y - boxes[j].y, 2);
+			if(b2bDist < 2.0*(boxes[i].width + boxes[j].width) && i != j) {
+				var iBoxSpeed = Math.sqrt(Math.pow(boxes[i].xvel , 2) + Math.pow(boxes[i].yvel, 2));
+				var jBoxSpeed = Math.sqrt(Math.pow(boxes[j].xvel , 2) + Math.pow(boxes[j].yvel, 2));
+				if(jBoxSpeed < 1 && iBoxSpeed < 1) {
+					boxes[i].idleLock++;
+					boxes[j].idleLock++;
+					if(boxes[i].idleLock > 10 || boxes[j].idleLock > 10) {
+						var xRand = Math.floor(Math.random()*7) + -3;
+						var yRand = Math.floor(Math.random()*7) + -3;
+						boxes[i].x += xRand;
+						boxes[j].x += xRand;
+						boxes[i].y -= yRand;
+						boxes[j].y -= yRand;
+						boxes[i].xvel = xRand;
+						boxes[i].yvel = yRand;
+						boxes[j].xvel = -xRand;
+						boxes[j].yvel = -yRand;
+					}
+				
+					/*var i2j = {x: boxes[j].x - boxes[i].x,
+							   y: boxes[j].y - boxes[i].y};
+					var xSpd = i2j.x
+					boxes[j].xvel = i2j.x;
+					boxes[j].yvel = i2j.y;
+					boxes[i].xvel = -i2j.x;
+					boxes[i].yvel = -i2j.y;*/
+					//console.log('hi');
+				} else if(boxes[i].xvel > boxes[j].xvel) {
+					boxes[j].rotation = boxes[i].rotation;
+					boxes[j].xvel = boxes[i].xvel;
+					boxes[j].yvel = boxes[i].yvel;
+					boxes[j].x += boxes[i].xvel;
+					boxes[j].y += boxes[i].yvel;
+				} else {
+					//console.log('bye');
+					boxes[i].rotation = boxes[j].rotation;
+					boxes[i].xvel = boxes[j].xvel;
+					boxes[i].yvel = boxes[j].yvel;
+					//boxes[i].x += boxes[j].xvel;
+					//boxes[i].y += boxes[j].yvel;
 				}
 			}
 		}
-	}*/
+	}
+
 }
 
 function spawnBoxes() {
@@ -115,17 +150,18 @@ function spawnBoxes() {
 	var wMax = 40;
 	var numBoxMin = 5;
 	var numBoxMax = 10;
-	var numBoxes = Math.round(Math.random()*(numBoxMax - numBoxMin)) + numBoxMin;
+	var numBoxes = Math.floor(Math.random()*(numBoxMax - numBoxMin)) + numBoxMin;
 	for(i = 0; i < numBoxes; i++) {
 		var newBox = {};
-		newBox.x = Math.round(Math.random()*(xMax - xMin)) + xMin;
-		newBox.y = Math.round(Math.random()*(yMax - yMin)) + yMin;
-		//newBox[4] = Math.round(Math.random()*(wMax - wMin)) + wMin;
+		newBox.x = Math.floor(Math.random()*(xMax - xMin)) + xMin;
+		newBox.y = Math.floor(Math.random()*(yMax - yMin)) + yMin;
+		//newBox[4] = Math.floor(Math.random()*(wMax - wMin)) + wMin;
 		newBox.width = 16;
 		newBox.xvel = 0;
 		newBox.yvel = 0;
-		newBox.color = Math.round(Math.random()*3);
+		newBox.color = Math.floor(Math.random()*3);
 		newBox.rotation = 0;
+		newBox.idleLock = 0;
 		boxes.push(newBox);
 	}
 }
@@ -146,19 +182,19 @@ function drawBoxes() {
 		//update box position for next draw
 		boxes[i].x+=boxes[i].xvel;
 		boxes[i].y+=boxes[i].yvel;
-		if(boxes[i].x > windowedWidth - playerSize) {
-			boxes[i].x = windowedWidth - boxes[i].width;
-			boxes[i].xvel = 0;
-		} else if(boxes[i].x < 0) {
-			boxes[i].x = 0;
-			boxes[i].xvel = 0;
+		if(boxes[i].x > windowedWidth - boxes[i].width) {
+			boxes[i].x = windowedWidth - boxes[i].width - 1;
+			boxes[i].xvel *= -1.1;
+		} else if(boxes[i].x < boxes[i].width) {
+			boxes[i].x = boxes[i].width + 1;
+			boxes[i].xvel *= -1.1;
 		}
-		if(boxes[i].y > playHeight - playerSize) {
-			boxes[i].y = playHeight - boxes[i].width;
-			boxes[i].yvel = 0;
-		} else if(boxes[i].y < 0) {
-			boxes[i].y = 0;
-			boxes[i].yvel = 0;
+		if(boxes[i].y > playHeight - boxes[i].width) {
+			boxes[i].y = playHeight - boxes[i].width - 1;
+			boxes[i].yvel *= -1.1;
+		} else if(boxes[i].y < boxes[i].width) {
+			boxes[i].y = boxes[i].width + 1;
+			boxes[i].yvel *= -1.1;
 		}
 		boxes[i].xvel *= 0.8;
 		boxes[i].yvel *= 0.8;
@@ -189,7 +225,7 @@ function playerMovement(player) {
   corners[2] = {x:player.x + -Math.cos((90 - player.angle)*TO_RADIANS )*20, y:player.y + Math.sin((90 - player.angle)*TO_RADIANS )*20};
    ctx.fillRect(corners[2].x,corners[2].y,2,2);
   corners[3] = { x:corners[1].x + corners[2].x - corners[0].x ,y:corners[1].y + corners[2].y - corners[0].y };*/
-  ctx.fillRect(player.collisionBox.x,player.collisionBox.y,4,4);
+ // ctx.fillRect(player.collisionBox.x,player.collisionBox.y,4,4);
 
 
   let LEFT = pressedKeys.includes(37);
@@ -200,7 +236,7 @@ function playerMovement(player) {
   if (SPACE && fuel.fuelPercent > 0) {
     player.x += Math.cos(player.angle*TO_RADIANS) * player.moveSpeed;
     player.y += Math.sin(player.angle*TO_RADIANS) * player.moveSpeed;
-    fuel.fuelPercent-=0.2;
+    fuel.fuelPercent-=0.075;
   }
   if (LEFT) {
     player.angle -= player.angleSpeed;
