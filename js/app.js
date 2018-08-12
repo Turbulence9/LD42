@@ -9,6 +9,8 @@ canvas.height = windowedHeight;
 let TO_RADIANS = Math.PI/180;
 let smallestBox = 16;
 let factoryWall = 87;
+let magnet = 0;
+let explosion = 0;
 
 let forkLift = {
   x: 200,
@@ -49,12 +51,16 @@ function update() {
   if(frameCount % 100 == 0) {
   spawnBoxes();
   }
+  if(frameCount % 500 == 0) {
+	  explosion = 1;
+  }
   frameCount+=1;
   if (frameCount % fuel.fuelsprSpd == 0) {
     fuel.frameCount++;
   }
   drawBoxes();
   boxCollision(forkLift);
+  removeBoxes();
   drawUI();
   requestAnimationFrame(update);
 }
@@ -83,42 +89,85 @@ function boxCollision(player) {
 		var yDiff = boxes[i].y - player.collisionBox.y;
 		var cDst = Math.sqrt(Math.pow(xDiff,2) + Math.pow(yDiff,2));
 		if(cDst < 20) {	
-			boxes[i].rotation = player.angle;
+			boxes[i].rotation = player.angle * TO_RADIANS;
 			boxes[i].xvel = Math.cos(player.angle* TO_RADIANS) * player.moveSpeed;
 			boxes[i].yvel = Math.sin(player.angle* TO_RADIANS) * player.moveSpeed;
 		}
+		//magnet power up
+		if(magnet == 1) {
+			if(cDst < 700) {
+				var towardsAngle = Math.atan2(yDiff, xDiff);
+				boxes[i].rotation = towardsAngle;
+				boxes[i].xvel = -Math.cos(towardsAngle) * Math.pow((.999),cDst) * 3;
+				boxes[i].yvel = -Math.sin(towardsAngle) * Math.pow((.999),cDst) * 3;
+			}
+		}
+		//booom
+		if(explosion == 1) {
+			if(cDst < 700) {
+				var towardsAngle = Math.atan2(yDiff, xDiff);
+				boxes[i].rotation = towardsAngle;
+				boxes[i].xvel = Math.cos(towardsAngle) * Math.pow((.99),cDst) * 80;
+				boxes[i].yvel = Math.sin(towardsAngle) * Math.pow((.99),cDst) * 80;
+			}
+		}
+		//wall collisions
+		if(boxes[i].x > windowedWidth - (boxes[i].width / 2)) {
+			boxes[i].x = windowedWidth - (boxes[i].width / 2) - 1;
+			boxes[i].xvel *= -.5;
+		} else if(boxes[i].x < (boxes[i].width / 2) + factoryWall) {
+			boxes[i].x = (boxes[i].width / 2) + 8 + factoryWall;
+			if(boxes[i].xvel < 0) {
+				boxes[i].xvel *=-.5;
+			}
+
+		}
+		if(boxes[i].y > playHeight - (boxes[i].width / 2)) {
+			boxes[i].y = playHeight - (boxes[i].width / 2)- 1;
+			boxes[i].yvel *= -.5;
+		} else if(boxes[i].y < (boxes[i].width / 2)) {
+			boxes[i].y = (boxes[i].width / 2) + 1;
+			boxes[i].yvel *= -.5;
+		}
 		//rectangle hitbox	
-		var curI = boxes[i];
 		for(j = 0; j < boxes.length; j++) {
-			var b2bDist = Math.pow(curI.x - boxes[j].x, 2) + Math.pow(curI.y - boxes[j].y, 2);
-			if(b2bDist < 2.0*(curI.width + boxes[j].width) && i != j) {
-				if(curI.color == boxes[j].color) {
+			if(i < 0 || j < 0) {
+				alert('mountain momma');
+			}
+			var b2bDist = Math.pow(boxes[i].x - boxes[j].x, 2) + Math.pow(boxes[i].y - boxes[j].y, 2);
+			if(b2bDist < 3.5*(boxes[i].width + boxes[j].width) && i != j) {
+			//if(i != j && boxes.length > 20) {
+				if(boxes[i].color == boxes[j].color) {
+				//if(true) {
 					//merge those mommas
-					if(curI.width < boxes[j].width) {
-						curI.width = (curI.width / 4) + boxes[j].width;
+					if(boxes[i].width < boxes[j].width) {
+						boxes[i].width = (boxes[i].width / 4) + boxes[j].width;
 					} else {
-						curI.width += boxes[j].width / 4;
+						boxes[i].width += boxes[j].width / 4;
 					}
 					boxes.splice(j, 1);
 					j--;
+					if(i > j) {
+						i--;
+					}
 				} else {
-				var iBoxSpeed = Math.sqrt(Math.pow(curI.xvel , 2) + Math.pow(curI.yvel, 2));
+				var iBoxSpeed = Math.sqrt(Math.pow(boxes[i].xvel , 2) + Math.pow(boxes[i].yvel, 2));
 				var jBoxSpeed = Math.sqrt(Math.pow(boxes[j].xvel , 2) + Math.pow(boxes[j].yvel, 2));
 				if(jBoxSpeed < 1 && iBoxSpeed < 1) {
-					curI.idleLock++;
+					boxes[i].idleLock++;
 					boxes[j].idleLock++;
 					if(boxes[i].idleLock > 10 || boxes[j].idleLock > 10) {
 						var xSign = Math.round(Math.random()) * 2 - 1
 						var xSign = Math.round(Math.random()) * 2 - 1
-						curI.x += 6.6*xSign;
+						boxes[i].x += 6.6*xSign;
 						boxes[j].x -= 6.6*xSign;
-						curI.y += 6.6*xSign;
+						boxes[i].y += 6.6*xSign;
 						boxes[j].y -= 6.6*xSign;
-						curI.xvel = 2.6*xSign;
-						curI.yvel = 2.6*xSign;
+						boxes[i].xvel = 2.6*xSign;
+						boxes[i].yvel = 2.6*xSign;
 						boxes[j].xvel = -2.6*xSign;
 						boxes[j].yvel = 2.6*xSign;
-						curI.idleLock = 0;
+						boxes[i].idleLock = 0;
 						boxes[j].idleLock = 0;
 					}
 				} else if(iBoxSpeed > jBoxSpeed) {
@@ -127,23 +176,40 @@ function boxCollision(player) {
 					boxes[j].yvel = boxes[i].yvel;
 					boxes[j].x += boxes[i].xvel;
 					boxes[j].y += boxes[i].yvel;
-					curI.idleLock = 0;
+					boxes[i].idleLock = 0;
 					boxes[j].idleLock = 0;
 				} else {
-					curI.rotation = boxes[j].rotation;
-					curI.xvel = boxes[j].xvel;
-					curI.yvel = boxes[j].yvel;					
-					curI.x += boxes[j].xvel;
-					curI.y += boxes[j].yvel;
-					curI.idleLock = 0;
+					boxes[i].rotation = boxes[j].rotation;
+					boxes[i].xvel = boxes[j].xvel;
+					boxes[i].yvel = boxes[j].yvel;					
+					boxes[i].x += boxes[j].xvel;
+					boxes[i].y += boxes[j].yvel;
+					boxes[i].idleLock = 0;
 					boxes[j].idleLock = 0;
 				}
 			}
 			}
 		}
 	}
-	for(i = splicer.length - 1; i >= 0; i--) {
-		boxes.splice(splicer[i], 1);
+	if(explosion == 1) {
+		explosion = 0;
+	}
+}
+
+function removeBoxes() {
+	for(i = boxes.length - 1; i >= 0; i--) {
+		if(boxes[i].x > 889) { 
+			if(boxes[i].color == 0 && boxes[i].y < 134){
+				console.log('b');
+				boxes.splice(i, 1);
+			} else if(boxes[i].color == 1 && boxes[i].y > 202 && boxes[i].y < 333) {
+				console.log('g');
+				boxes.splice(i, 1);
+			} else if(boxes[i].color == 2 && boxes[i].y > 404) {
+				console.log('r');
+				boxes.splice(i, 1);
+			}
+		}
 	}
 }
 
@@ -157,9 +223,9 @@ function spawnBoxes() {
 	var numBoxMin = 5;
 	var numBoxMax = 10;
 	var xVelMin = 6;
-	var xVelMax = 10;
-	var yVelMin = -15;
-	var yVelMax = 15;
+	var xVelMax = 13;
+	var yVelMin = -10;
+	var yVelMax = 10;
 	var numBoxes = Math.floor(Math.random()*(numBoxMax - numBoxMin)) + numBoxMin;
 	for(i = 0; i < numBoxes; i++) {
 		var newBox = {};
@@ -174,7 +240,6 @@ function spawnBoxes() {
 		newBox.color = Math.floor(Math.random()*3);
 		newBox.rotation = 0;
 		newBox.idleLock = 0;
-		newBox.spawn = 1;
 		boxes.push(newBox);
 	}
 }
@@ -183,7 +248,7 @@ function drawBoxes() {
 	for(i = 0; i < boxes.length; i++) {
 		ctx.save();
 		ctx.translate(boxes[i].x, boxes[i].y);
-		ctx.rotate(boxes[i].rotation * TO_RADIANS);
+		ctx.rotate(boxes[i].rotation);
 		if(boxes[i].color == 0) {
 			ctx.drawImage(spr_blueBox, -(boxes[i].width / 2), -(boxes[i].width / 2), boxes[i].width, boxes[i].width);
 		} else if(boxes[i].color == 1) {
@@ -195,38 +260,8 @@ function drawBoxes() {
 		//update box position for next draw
 		boxes[i].x+=boxes[i].xvel;
 		boxes[i].y+=boxes[i].yvel;
-		if(boxes[i].spawn == 0) {
-		if(boxes[i].x > windowedWidth - boxes[i].width) {
-			boxes[i].x = windowedWidth - boxes[i].width - 1;
-			boxes[i].xvel *= -1.1;
-		} else if(boxes[i].x < boxes[i].width + factoryWall) {
-			boxes[i].x = boxes[i].width + 8 + factoryWall;
-			boxes[i].xvel *= -1.1;
-		}
-		if(boxes[i].y > playHeight - boxes[i].width) {
-			boxes[i].y = playHeight - boxes[i].width - 1;
-			boxes[i].yvel *= -1.1;
-		} else if(boxes[i].y < boxes[i].width) {
-			boxes[i].y = boxes[i].width + 1;
-			boxes[i].yvel *= -1.1;
-		}
-		boxes[i].xvel *= 0.8;
-		boxes[i].yvel *= 0.8;
-		} else {
-			if(boxes[i].x > boxes[i].width+factoryWall) {
-				boxes[i].spawn = 0;
-			}
-		}
-		// corners
-		/*boxes[i][7] = {x:boxes[i].x, y:boxes[i].y};
-		boxes[i][8] = {x:boxes[i].x + boxes[i].width, y:boxes[i].y};
-		boxes[i][9] = {x:boxes[i].x, y:boxes[i].y + boxes[i].width};
-		boxes[i][10] = {x:boxes[i].x + boxes[i].width, y:boxes[i].y + boxes[i].width};
-		//sides
-		boxes[i][11] = {x:boxes[i].x, y:boxes[i].y + (boxes[i].width / 2)};
-		boxes[i][12] = {x:boxes[i].x + (boxes[i].width / 2), y:boxes[i].y};
-		boxes[i][13] = {x:boxes[i].x + (boxes[i].width / 2), y:boxes[i].y + boxes[i].width};
-		boxes[i][14] = {x:boxes[i].x + boxes[i].width, y:boxes[i].y + (boxes[i].width / 2)};*/
+		boxes[i].xvel *= 0.92;
+		boxes[i].yvel *= 0.92;
 	}
 }
 
@@ -235,20 +270,6 @@ let pressedKeys = [];
 function playerMovement(player) {
 	player.collisionPt = {x:player.x + Math.cos(player.angle*TO_RADIANS )*player.size/2, y:player.y + Math.sin(player.angle*TO_RADIANS) * player.size/2};
 	player.collisionBox = {x:player.x + Math.cos(player.angle*TO_RADIANS )*player.size/3, y:player.y + Math.sin(player.angle*TO_RADIANS) * player.size/3};
-
-	/*var corners = [];
-   ctx.fillStyle="#FF0000";
-  corners[0] = {x:player.x, y:player.y};
-  ctx.fillRect(corners[0].x,corners[0].y,2,2);
-  corners[1] = {x:player.x + Math.cos(player.angle*TO_RADIANS )*40, y:player.y + Math.sin(player.angle*TO_RADIANS) * 40};
-  corners[1] = {x:player.x + Math.cos(player.angle*TO_RADIANS )*40, y:player.y + Math.sin(player.angle*TO_RADIANS) * 40};
-  ctx.fillRect(corners[1].x,corners[1].y,2,2);
-  corners[2] = {x:player.x + -Math.cos((90 - player.angle)*TO_RADIANS )*20, y:player.y + Math.sin((90 - player.angle)*TO_RADIANS )*20};
-   ctx.fillRect(corners[2].x,corners[2].y,2,2);
-  corners[3] = { x:corners[1].x + corners[2].x - corners[0].x ,y:corners[1].y + corners[2].y - corners[0].y };*/
-  ctx.fillRect(player.collisionBox.x,player.collisionBox.y,4,4);
-
-
   let LEFT = pressedKeys.includes(37);
   let RIGHT = pressedKeys.includes(39);
   let SPACE = pressedKeys.includes(32);
@@ -282,8 +303,12 @@ function drawRotatedImage(image, x, y, angle) {
 	ctx.save();
 	ctx.translate(x, y);
 	ctx.rotate(angle * TO_RADIANS);
-  ctx.drawImage(image, -(forkLift.size/2), -(forkLift.size/2));
-  ctx.restore();
+	ctx.drawImage(image, -(forkLift.size/2), -(forkLift.size/2));
+	if(magnet == 1) {
+		ctx.rotate(90 * TO_RADIANS);
+		ctx.drawImage(magnetPic, -18, -40);
+	}
+	ctx.restore();
 
 }
 
