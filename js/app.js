@@ -101,16 +101,18 @@ function boxCollision(player) {
 					boxes[i].idleLock++;
 					boxes[j].idleLock++;
 					if(boxes[i].idleLock > 10 || boxes[j].idleLock > 10) {
-						var xRand = Math.floor(Math.random()*7) + -3;
-						var yRand = Math.floor(Math.random()*7) + -3;
-						boxes[i].x += xRand;
-						boxes[j].x += xRand;
-						boxes[i].y -= yRand;
-						boxes[j].y -= yRand;
-						boxes[i].xvel = xRand;
-						boxes[i].yvel = yRand;
-						boxes[j].xvel = -xRand;
-						boxes[j].yvel = -yRand;
+						var xSign = Math.round(Math.random()) * 2 - 1
+						var xSign = Math.round(Math.random()) * 2 - 1
+						boxes[i].x += 6.6*xSign;
+						boxes[j].x -= 6.6*xSign;
+						boxes[i].y += 6.6*xSign;
+						boxes[j].y -= 6.6*xSign;
+						boxes[i].xvel = 2.6*xSign;
+						boxes[i].yvel = 2.6*xSign;
+						boxes[j].xvel = -2.6*xSign;
+						boxes[j].yvel = 2.6*xSign;
+						boxes[i].idleLock = 0;
+						boxes[j].idleLock = 0;
 					}
 				
 					/*var i2j = {x: boxes[j].x - boxes[i].x,
@@ -127,11 +129,15 @@ function boxCollision(player) {
 					boxes[j].yvel = boxes[i].yvel;
 					boxes[j].x += boxes[i].xvel;
 					boxes[j].y += boxes[i].yvel;
+					boxes[i].idleLock = 0;
+					boxes[j].idleLock = 0;
 				} else {
 					//console.log('bye');
 					boxes[i].rotation = boxes[j].rotation;
 					boxes[i].xvel = boxes[j].xvel;
 					boxes[i].yvel = boxes[j].yvel;
+					boxes[i].idleLock = 0;
+					boxes[j].idleLock = 0;
 					//boxes[i].x += boxes[j].xvel;
 					//boxes[i].y += boxes[j].yvel;
 				}
@@ -144,24 +150,30 @@ function boxCollision(player) {
 function spawnBoxes() {
 	var xMin = 100;
 	var xMax = 900;
-	var yMin = 100;
-	var yMax = 500;
+	var yMin = 200;
+	var yMax = 400;
 	var wMin = 10;
 	var wMax = 40;
 	var numBoxMin = 5;
 	var numBoxMax = 10;
+	var xVelMin = 4;
+	var xVelMax = 30;
+	var yVelMin = -15;
+	var yVelMax = 15;
 	var numBoxes = Math.floor(Math.random()*(numBoxMax - numBoxMin)) + numBoxMin;
 	for(i = 0; i < numBoxes; i++) {
 		var newBox = {};
-		newBox.x = Math.floor(Math.random()*(xMax - xMin)) + xMin;
+		//newBox.x = Math.floor(Math.random()*(xMax - xMin)) + xMin;
+		newBox.x = 0.0;
 		newBox.y = Math.floor(Math.random()*(yMax - yMin)) + yMin;
 		//newBox[4] = Math.floor(Math.random()*(wMax - wMin)) + wMin;
 		newBox.width = 16;
-		newBox.xvel = 0;
-		newBox.yvel = 0;
+		newBox.xvel = Math.floor(Math.random()*(xVelMax - xVelMin)) + xVelMin;
+		newBox.yvel = Math.floor(Math.random()*(yVelMax - yVelMin)) + yVelMin;
 		newBox.color = Math.floor(Math.random()*3);
 		newBox.rotation = 0;
 		newBox.idleLock = 0;
+		newBox.spawn = 1;
 		boxes.push(newBox);
 	}
 }
@@ -182,6 +194,7 @@ function drawBoxes() {
 		//update box position for next draw
 		boxes[i].x+=boxes[i].xvel;
 		boxes[i].y+=boxes[i].yvel;
+		if(boxes[i].spawn == 1) {
 		if(boxes[i].x > windowedWidth - boxes[i].width) {
 			boxes[i].x = windowedWidth - boxes[i].width - 1;
 			boxes[i].xvel *= -1.1;
@@ -195,6 +208,11 @@ function drawBoxes() {
 		} else if(boxes[i].y < boxes[i].width) {
 			boxes[i].y = boxes[i].width + 1;
 			boxes[i].yvel *= -1.1;
+		}
+		} else {
+			if(boxes[i].x > boxes[i].width) {
+				boxes[i].spawn = 0;
+			}
 		}
 		boxes[i].xvel *= 0.8;
 		boxes[i].yvel *= 0.8;
