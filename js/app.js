@@ -7,7 +7,6 @@ let playHeight = windowedHeight - 100;
 canvas.width = windowedWidth;
 canvas.height = windowedHeight;
 let TO_RADIANS = Math.PI/180;
-let playerSize = 120;
 
 let forkLift = {
   x: 200,
@@ -15,6 +14,7 @@ let forkLift = {
   angle: 0,
   moveSpeed: 6,
   angleSpeed: 4,
+  size: 120,
   dx: 0,
   dy: 0,
   collisionPt: 0,
@@ -43,7 +43,7 @@ function update() {
   canvas.width = canvas.width;
   drawRotatedImage(spr_forkLift,forkLift.x,forkLift.y,forkLift.angle);
   playerMovement(forkLift);
-  if(frameCount == 0) {
+  if(frameCount % 100 == 0) {
   spawnBoxes();
   }
   frameCount+=1;
@@ -74,18 +74,11 @@ function test() {
 //corners of player are (x, y),(x + width, y), (x, y + width), (x+ width, y + width)
 function boxCollision(player) {
 	for(i = 0; i < boxes.length; i++) {
-		var boxCentx = boxes[i].x;
-		var boxCenty = boxes[i].y;
 		//cDst for circle hitbox
-		var xDiff = boxCentx - player.collisionBox.x;
-		var yDiff = boxCenty - player.collisionBox.y;
+		var xDiff = boxes[i].x - player.collisionBox.x;
+		var yDiff = boxes[i].y - player.collisionBox.y;
 		var cDst = Math.sqrt(Math.pow(xDiff,2) + Math.pow(yDiff,2));
-		/*ctx.beginPath();
-		ctx.fillStyle="00FF00";
-		ctx.arc( player.collisionBox.x, player.collisionBox.y,(boxes[i].width+ 10) / 2,0,2*Math.PI);
-		ctx.fill();*/
-
-		if(cDst < ((playerSize) / 2)) {
+		if(cDst < 14) {
 			boxes[i].rotation = player.angle;
       if(i == 0) {
         console.log(Math.cos(player.angle* TO_RADIANS) * player.moveSpeed,Math.sin(player.angle* TO_RADIANS) * player.moveSpeed)
@@ -93,7 +86,7 @@ function boxCollision(player) {
 			boxes[i].x += Math.cos(player.angle* TO_RADIANS) * player.moveSpeed;
 			boxes[i].y += Math.sin(player.angle* TO_RADIANS) * player.moveSpeed;
 		}
-
+		//rectangle hitbox
 		for(j = 1; j < boxes.length; j++) {
 			var b2bDist = Math.pow(boxes[i].x - boxes[j].x, 2) + Math.pow(boxes[i].y - boxes[j].y, 2);
 			if(b2bDist < 2.0*(boxes[i].width + boxes[j].width) && i != j) {
@@ -102,7 +95,7 @@ function boxCollision(player) {
 				if(jBoxSpeed < 1 && iBoxSpeed < 1) {
 					boxes[i].idleLock++;
 					boxes[j].idleLock++;
-					if(boxes[i].idleLock > 10 || boxes[j].idleLock > 10) {
+					if(boxes[i].idleLock > 20 || boxes[j].idleLock > 20) {
 						var xSign = Math.round(Math.random()) * 2 - 1
 						var xSign = Math.round(Math.random()) * 2 - 1
 						boxes[i].x += 6.6*xSign;
@@ -116,16 +109,7 @@ function boxCollision(player) {
 						boxes[i].idleLock = 0;
 						boxes[j].idleLock = 0;
 					}
-
-					/*var i2j = {x: boxes[j].x - boxes[i].x,
-							   y: boxes[j].y - boxes[i].y};
-					var xSpd = i2j.x
-					boxes[j].xvel = i2j.x;
-					boxes[j].yvel = i2j.y;
-					boxes[i].xvel = -i2j.x;
-					boxes[i].yvel = -i2j.y;*/
-					//console.log('hi');
-				} else if(boxes[i].xvel > boxes[j].xvel) {
+				} else if(iBoxSpeed > jBoxSpeed) {
 					boxes[j].rotation = boxes[i].rotation;
 					boxes[j].xvel = boxes[i].xvel;
 					boxes[j].yvel = boxes[i].yvel;
@@ -134,14 +118,13 @@ function boxCollision(player) {
 					boxes[i].idleLock = 0;
 					boxes[j].idleLock = 0;
 				} else {
-					//console.log('bye');
 					boxes[i].rotation = boxes[j].rotation;
 					boxes[i].xvel = boxes[j].xvel;
 					boxes[i].yvel = boxes[j].yvel;
+					boxes[i].x += boxes[j].xvel;
+					boxes[i].y += boxes[j].yvel;
 					boxes[i].idleLock = 0;
 					boxes[j].idleLock = 0;
-					//boxes[i].x += boxes[j].xvel;
-					//boxes[i].y += boxes[j].yvel;
 				}
 			}
 		}
@@ -238,18 +221,20 @@ function drawBoxes() {
 let pressedKeys = [];
 
 function playerMovement(player) {
-	player.collisionPt = {x:player.x + Math.cos(player.angle*TO_RADIANS )*playerSize/2, y:player.y + Math.sin(player.angle*TO_RADIANS) * playerSize/2};
-	player.collisionBox = {x:player.x + Math.cos(player.angle*TO_RADIANS )*playerSize/3, y:player.y + Math.sin(player.angle*TO_RADIANS) * playerSize/3};
+	player.collisionPt = {x:player.x + Math.cos(player.angle*TO_RADIANS )*player.size/2, y:player.y + Math.sin(player.angle*TO_RADIANS) * player.size/2};
+	player.collisionBox = {x:player.x + Math.cos(player.angle*TO_RADIANS )*player.size/3, y:player.y + Math.sin(player.angle*TO_RADIANS) * player.size/3};
+
 	/*var corners = [];
    ctx.fillStyle="#FF0000";
   corners[0] = {x:player.x, y:player.y};
   ctx.fillRect(corners[0].x,corners[0].y,2,2);
   corners[1] = {x:player.x + Math.cos(player.angle*TO_RADIANS )*40, y:player.y + Math.sin(player.angle*TO_RADIANS) * 40};
+  corners[1] = {x:player.x + Math.cos(player.angle*TO_RADIANS )*40, y:player.y + Math.sin(player.angle*TO_RADIANS) * 40};
   ctx.fillRect(corners[1].x,corners[1].y,2,2);
   corners[2] = {x:player.x + -Math.cos((90 - player.angle)*TO_RADIANS )*20, y:player.y + Math.sin((90 - player.angle)*TO_RADIANS )*20};
    ctx.fillRect(corners[2].x,corners[2].y,2,2);
   corners[3] = { x:corners[1].x + corners[2].x - corners[0].x ,y:corners[1].y + corners[2].y - corners[0].y };*/
- ctx.fillRect(player.collisionBox.x,player.collisionBox.y,4,4);
+  //ctx.fillRect(player.collisionBox.x,player.collisionBox.y,4,4);
 
 
   let LEFT = pressedKeys.includes(37);
@@ -284,7 +269,7 @@ function drawRotatedImage(image, x, y, angle) {
 	ctx.save();
 	ctx.translate(x, y);
 	ctx.rotate(angle * TO_RADIANS);
-  ctx.drawImage(image, -(playerSize/2), -(playerSize/2));
+  ctx.drawImage(image, -(forkLift.size/2), -(forkLift.size/2));
   ctx.restore();
 
 }
