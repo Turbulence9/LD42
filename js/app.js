@@ -7,7 +7,7 @@ let playHeight = windowedHeight - 100;
 canvas.width = windowedWidth;
 canvas.height = windowedHeight;
 let TO_RADIANS = Math.PI/180;
-let playerSize = 60;
+let playerSize = 120;
 
 let forkLift = {
   x: 200,
@@ -15,7 +15,6 @@ let forkLift = {
   angle: 0,
   moveSpeed: 6,
   angleSpeed: 4,
-  size: 60,
   dx: 0,
   dy: 0,
   collisionPt: 0,
@@ -44,7 +43,7 @@ function update() {
   canvas.width = canvas.width;
   drawRotatedImage(spr_forkLift,forkLift.x,forkLift.y,forkLift.angle);
   playerMovement(forkLift);
-  if(frameCount % 100 == 0) {
+  if(frameCount == 0) {
   spawnBoxes();
   }
   frameCount+=1;
@@ -85,13 +84,16 @@ function boxCollision(player) {
 		ctx.fillStyle="00FF00";
 		ctx.arc( player.collisionBox.x, player.collisionBox.y,(boxes[i].width+ 10) / 2,0,2*Math.PI);
 		ctx.fill();*/
-		
-		if(cDst < ((boxes[i].width) / 2)) {	
+
+		if(cDst < ((playerSize) / 2)) {
 			boxes[i].rotation = player.angle;
-			boxes[i].xvel = Math.cos(player.angle* TO_RADIANS) * player.moveSpeed;
-			boxes[i].yvel = Math.sin(player.angle* TO_RADIANS) * player.moveSpeed;
+      if(i == 0) {
+        console.log(Math.cos(player.angle* TO_RADIANS) * player.moveSpeed,Math.sin(player.angle* TO_RADIANS) * player.moveSpeed)
+      }
+			boxes[i].x += Math.cos(player.angle* TO_RADIANS) * player.moveSpeed;
+			boxes[i].y += Math.sin(player.angle* TO_RADIANS) * player.moveSpeed;
 		}
-		
+
 		for(j = 1; j < boxes.length; j++) {
 			var b2bDist = Math.pow(boxes[i].x - boxes[j].x, 2) + Math.pow(boxes[i].y - boxes[j].y, 2);
 			if(b2bDist < 2.0*(boxes[i].width + boxes[j].width) && i != j) {
@@ -114,7 +116,7 @@ function boxCollision(player) {
 						boxes[i].idleLock = 0;
 						boxes[j].idleLock = 0;
 					}
-				
+
 					/*var i2j = {x: boxes[j].x - boxes[i].x,
 							   y: boxes[j].y - boxes[i].y};
 					var xSpd = i2j.x
@@ -192,6 +194,10 @@ function drawBoxes() {
 		}
 		ctx.restore();
 		//update box position for next draw
+    if(i == 0) {
+      console.log("xvel",boxes[i].xvel);
+      console.log("yvel",boxes[i].yvel);
+    }
 		boxes[i].x+=boxes[i].xvel;
 		boxes[i].y+=boxes[i].yvel;
 		if(boxes[i].spawn == 1) {
@@ -243,7 +249,7 @@ function playerMovement(player) {
   corners[2] = {x:player.x + -Math.cos((90 - player.angle)*TO_RADIANS )*20, y:player.y + Math.sin((90 - player.angle)*TO_RADIANS )*20};
    ctx.fillRect(corners[2].x,corners[2].y,2,2);
   corners[3] = { x:corners[1].x + corners[2].x - corners[0].x ,y:corners[1].y + corners[2].y - corners[0].y };*/
- // ctx.fillRect(player.collisionBox.x,player.collisionBox.y,4,4);
+ ctx.fillRect(player.collisionBox.x,player.collisionBox.y,4,4);
 
 
   let LEFT = pressedKeys.includes(37);
