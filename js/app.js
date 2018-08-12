@@ -7,6 +7,7 @@ let playHeight = windowedHeight - 100;
 canvas.width = windowedWidth;
 canvas.height = windowedHeight;
 let TO_RADIANS = Math.PI/180;
+let smallestBox = 16;
 
 let forkLift = {
   x: 200,
@@ -78,7 +79,7 @@ function boxCollision(player) {
 		var xDiff = boxes[i].x - player.collisionBox.x;
 		var yDiff = boxes[i].y - player.collisionBox.y;
 		var cDst = Math.sqrt(Math.pow(xDiff,2) + Math.pow(yDiff,2));
-		if(cDst < 14) {
+		if(cDst < 20) {
 			boxes[i].rotation = player.angle;
       if(i == 0) {
         console.log(Math.cos(player.angle* TO_RADIANS) * player.moveSpeed,Math.sin(player.angle* TO_RADIANS) * player.moveSpeed)
@@ -87,9 +88,20 @@ function boxCollision(player) {
 			boxes[i].y += Math.sin(player.angle* TO_RADIANS) * player.moveSpeed;
 		}
 		//rectangle hitbox
+    let curIbox = boxes[i];
 		for(j = 1; j < boxes.length; j++) {
-			var b2bDist = Math.pow(boxes[i].x - boxes[j].x, 2) + Math.pow(boxes[i].y - boxes[j].y, 2);
-			if(b2bDist < 2.0*(boxes[i].width + boxes[j].width) && i != j) {
+			var b2bDist = Math.pow(curIbox.x - boxes[j].x, 2) + Math.pow(curIbox.y - boxes[j].y, 2);
+			if(b2bDist < 2.0*(curIbox.width + boxes[j].width) && i != j) {
+				if(curIbox.color == boxes[j].color) {
+					//merge those mommas
+					if(curIbox.width < boxes[j].width) {
+						curIbox.width = (curIbox.width / 4) + boxes[j].width;
+					} else {
+						curIbox.width += boxes[j].width / 4;
+					}
+					boxes.splice(j, 1);
+					j--;
+				} else {
 				var iBoxSpeed = Math.sqrt(Math.pow(boxes[i].xvel , 2) + Math.pow(boxes[i].yvel, 2));
 				var jBoxSpeed = Math.sqrt(Math.pow(boxes[j].xvel , 2) + Math.pow(boxes[j].yvel, 2));
 				if(jBoxSpeed < 1 && iBoxSpeed < 1) {
@@ -127,6 +139,7 @@ function boxCollision(player) {
 					boxes[j].idleLock = 0;
 				}
 			}
+			}
 		}
 	}
 
@@ -152,7 +165,7 @@ function spawnBoxes() {
 		newBox.x = 0.0;
 		newBox.y = Math.floor(Math.random()*(yMax - yMin)) + yMin;
 		//newBox[4] = Math.floor(Math.random()*(wMax - wMin)) + wMin;
-		newBox.width = 16;
+		newBox.width = smallestBox;
 		newBox.xvel = Math.floor(Math.random()*(xVelMax - xVelMin)) + xVelMin;
 		newBox.yvel = Math.floor(Math.random()*(yVelMax - yVelMin)) + yVelMin;
 		newBox.color = Math.floor(Math.random()*3);
@@ -168,12 +181,13 @@ function drawBoxes() {
 		ctx.save();
 		ctx.translate(boxes[i].x, boxes[i].y);
 		ctx.rotate(boxes[i].rotation * TO_RADIANS);
+		ctx.scale(boxes[i].width / smallestBox,boxes[i].width / smallestBox)
 		if(boxes[i].color == 0) {
-			ctx.drawImage(spr_blueBox, -8, -8);
+			ctx.drawImage(spr_blueBox, -(boxes[i].width / 2), -(boxes[i].width / 2));
 		} else if(boxes[i].color == 1) {
-			ctx.drawImage(spr_greenBox, -8, -8);
+			ctx.drawImage(spr_greenBox, -(boxes[i].width / 2), -(boxes[i].width / 2));
 		} else {
-			ctx.drawImage(spr_redBox, -8, -8);
+			ctx.drawImage(spr_redBox, -(boxes[i].width / 2), -(boxes[i].width / 2));
 		}
 		ctx.restore();
 		//update box position for next draw
