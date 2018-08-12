@@ -35,7 +35,7 @@ let box = {
 	color: 0
 }
 //boxes[0] = x coord, boxes[1] = y coord, boxes[2] = x vel, boxes[3] = y vel, boxes[4] = width, boxes[5] = color
-// boxes[6] rotation, boxes[7] corner 1, boxes[8] corner 2, boxes[9] corner3, boxes[10] corner 4, boxes[11] side1, 
+// boxes[6] rotation, boxes[7] corner 1, boxes[8] corner 2, boxes[9] corner3, boxes[10] corner 4, boxes[11] side1,
 //boxes[12] side2, boxes[13] side3, boxes[14] side 4,
 var boxes = [];
 var frameCount = 0;
@@ -81,10 +81,10 @@ function boxCollision(player) {
 		var xDiff = boxCentx - player.collisionBox.x;
 		var yDiff = boxCenty - player.collisionBox.y;
 		var cDst = Math.sqrt(Math.pow(xDiff,2) + Math.pow(yDiff,2));
-		ctx.beginPath();
+		/*ctx.beginPath();
 		ctx.fillStyle="00FF00";
 		ctx.arc( player.collisionBox.x, player.collisionBox.y,(boxes[i].width+ 10) / 2,0,2*Math.PI);
-		ctx.fill();
+		ctx.fill();*/
 		
 		if(cDst < ((boxes[i].width) / 2)) {	
 			boxes[i].rotation = player.angle;
@@ -132,17 +132,16 @@ function spawnBoxes() {
 
 function drawBoxes() {
 	for(i = 0; i < boxes.length; i++) {
-		if(boxes[i].color == 0) {
-			ctx.fillStyle="#FF0000";
-		} else if(boxes[i].color == 1) {
-			ctx.fillStyle="#00FF00";
-		} else {
-			ctx.fillStyle="#0000FF";
-		}
 		ctx.save();
 		ctx.translate(boxes[i].x, boxes[i].y);
 		ctx.rotate(boxes[i].rotation * TO_RADIANS);
-		ctx.fillRect(-8,-8,boxes[i].width,boxes[i].width);
+		if(boxes[i].color == 0) {
+			ctx.drawImage(spr_blueBox, -8, -8);
+		} else if(boxes[i].color == 1) {
+			ctx.drawImage(spr_greenBox, -8, -8);
+		} else {
+			ctx.drawImage(spr_redBox, -8, -8);
+		}
 		ctx.restore();
 		//update box position for next draw
 		boxes[i].x+=boxes[i].xvel;
