@@ -22,3 +22,5 @@ let nums = new Image(484, 86);
 nums.src = 'assets/nums.png';
 let params = new Image(248, 150);
 params.src = 'assets/params.png';
+let audio = new Audio('SuckerThis.wav');
+audio.pause();

@@ -146,11 +146,11 @@ function boxCollision(player) {
 		}
 		//magnet power up
 		if(magnet.duration > 0 && magnet.held == 1) {
-			if(cDst < 700) {
+			if(cDst < 500) {
 				var towardsAngle = Math.atan2(yDiff, xDiff);
 				boxes[i].rotation = towardsAngle;
-				boxes[i].xvel = -Math.cos(towardsAngle) * Math.pow((.999),cDst) * 3;
-				boxes[i].yvel = -Math.sin(towardsAngle) * Math.pow((.999),cDst) * 3;
+				boxes[i].xvel = -Math.cos(towardsAngle) * Math.pow((.9986),cDst) * 3;
+				boxes[i].yvel = -Math.sin(towardsAngle) * Math.pow((.9986),cDst) * 3;
 			}
 		}
 		//booom
@@ -160,8 +160,8 @@ function boxCollision(player) {
 				var yDiffB = boxes[i].y - bomb.y - 40;
 				var towardsAngle = Math.atan2(yDiffB, xDiffB);
 				boxes[i].rotation = towardsAngle;
-				boxes[i].xvel = Math.cos(towardsAngle) * Math.pow((.99),cDst) * 80;
-				boxes[i].yvel = Math.sin(towardsAngle) * Math.pow((.99),cDst) * 80;
+				boxes[i].xvel = Math.cos(towardsAngle) * Math.pow((.999),cDst) * 100;
+				boxes[i].yvel = Math.sin(towardsAngle) * Math.pow((.999),cDst) * 100;
 			}
 			bomb.spawn = 0;
 			bomb.ticker = 0;
@@ -350,7 +350,7 @@ function playerMovement(player) {
   }
   if(Math.abs(player.collisionPt.y - magnet.y) < 40 && Math.abs(player.collisionPt.x - magnet.x) < 40 && magnet.held == 0) {
 	  magnet.held = 1;
-	  magnet.duration = 750;
+	  magnet.duration = 400;
   }
     if(Math.abs(player.collisionPt.y - bomb.y) < 30 && Math.abs(player.collisionPt.x - bomb.x) < 30 && bomb.active== 0) {
 	  bomb.active = 1;
@@ -428,6 +428,7 @@ window.addEventListener("keydown", onKeyDown, false);
 window.addEventListener("keyup", onKeyUp, false);
 
 function onKeyDown(event){
+audio.play();
   var keyCode = event.keyCode;
   if (!pressedKeys.includes(keyCode)) {
     pressedKeys.push(keyCode);
