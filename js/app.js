@@ -63,7 +63,6 @@ var boxes = [];
 var frameCount = 0;
 
 function update() {
-  console.log(pressedKeys);
   canvas.width = canvas.width;
   if (level == "start") {
     ctx.drawImage(start,0,0,1024,640);
@@ -101,8 +100,9 @@ function update() {
     }
     if(bomb.spawn == 1) {
       drawBomb();
+    }  else {
+  	  bomb.x = -1000;
     }
-
     fuelStation();
     boxCollision(forkLift);
     removeBoxes();
@@ -118,7 +118,7 @@ function update() {
 }
 
 function spawnMag() {
-	var chance = Math.floor(Math.random() * 100);
+	var chance = Math.floor(Math.random() * 1000);
 	if(chance == 1 && magnet.duration == 0) {
 			magnet.held = 0;
 			magnet.duration = 500;
