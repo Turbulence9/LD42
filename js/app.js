@@ -61,7 +61,6 @@ var boxes = [];
 var frameCount = 0;
 
 function update() {
-  console.log(score);
   canvas.width = canvas.width;
     ctx.drawImage(background,0, 0, 1024, 540);
   drawRotatedImage(spr_forkLift,forkLift.x,forkLift.y,forkLift.angle);
@@ -118,13 +117,12 @@ function drawBomb() {
 		} else {
 			px = ((5 - (Math.floor(bomb.ticker / 100))) * 49) + 49;
 		}
-		ctx.drawImage(spr_bomb,px + 4,0,49,99,bomb.x, bomb.y, 49, 99);
-		ctx.fillRect(bomb.x, bomb.x, 10, 10);
+		ctx.drawImage(spr_bomb,px + 4,0,49,99,bomb.x - 20, bomb.y - 40, 49, 99);
 		bomb.ticker--;
 }
 
 function spawnBomb() {
-	var chance = Math.floor(Math.random() * 100);
+	var chance = Math.floor(Math.random() * 400);
 	if(chance == 1 && bomb.spawn == 0) {
 			bomb.spawn = 1;
 			bomb.ticker = 500;
@@ -158,8 +156,8 @@ function boxCollision(player) {
 		//booom
 		if(bomb.explode == 1) {
 			if(cDst < 700) {
-				var xDiffB = boxes[i].x - bomb.x;
-				var yDiffB = boxes[i].y - bomb.y;
+				var xDiffB = boxes[i].x - bomb.x - 20;
+				var yDiffB = boxes[i].y - bomb.y - 40;
 				var towardsAngle = Math.atan2(yDiffB, xDiffB);
 				boxes[i].rotation = towardsAngle;
 				boxes[i].xvel = Math.cos(towardsAngle) * Math.pow((.99),cDst) * 80;
