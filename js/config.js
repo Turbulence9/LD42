@@ -14,3 +14,5 @@ let background = new Image(2048, 1080);
 background.src = './assets/backgroundCol.png';
 let magnetPic = new Image(40, 54);
 magnetPic.src = './assets/magnet.png';
+let spr_bomb = new Image(358, 99);
+spr_bomb.src = './assets/bombomb.png';

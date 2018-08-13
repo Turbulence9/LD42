@@ -9,7 +9,6 @@ canvas.height = windowedHeight;
 let TO_RADIANS = Math.PI/180;
 let smallestBox = 16;
 let factoryWall = 87;
-let magnet = 0;
 let explosion = 0;
 
 let forkLift = {
@@ -37,6 +36,22 @@ let box = {
 	width: 0,
 	color: 0
 }
+
+let magnet = {
+	x: 0,
+	y: 0,
+	held: 0,
+	duration: 0
+}
+
+let bomb = {
+	x: 0,
+	y: 0,
+	ticker: 0,
+	spawn: 0,
+	active: 0,
+	explode:0
+};
 //boxes[0] = x coord, boxes[1] = y coord, boxes[2] = x vel, boxes[3] = y vel, boxes[4] = width, boxes[5] = color
 // boxes[6] rotation, boxes[7] corner 1, boxes[8] corner 2, boxes[9] corner3, boxes[10] corner 4, boxes[11] side1,
 //boxes[12] side2, boxes[13] side3, boxes[14] side 4,
@@ -49,8 +64,14 @@ function update() {
   drawRotatedImage(spr_forkLift,forkLift.x,forkLift.y,forkLift.angle);
   playerMovement(forkLift);
   if(frameCount % 100 == 0) {
-  spawnBoxes();
+	spawnBoxes();
   }
+  if(bomb.ticker == 0 && bomb.spawn == 1) {
+	bomb.spawn = 0;
+	bomb.active = 0;
+  }
+  spawnMag();
+  spawnBomb();
   if(frameCount % 500 == 0) {
 	  explosion = 1;
   }
@@ -59,25 +80,53 @@ function update() {
     fuel.frameCount++;
   }
   drawBoxes();
+  if(magnet.duration > 0) {
+	  drawMag();
+	  magnet.duration--;
+  }
+  if(bomb.active == 1 && bomb.ticker == 90) {
+	  bomb.explode = 1;
+  }
+  if(bomb.spawn == 1) {
+	  drawBomb();
+  }
   boxCollision(forkLift);
   removeBoxes();
   drawUI();
   requestAnimationFrame(update);
 }
 
-function test() {
-	var temp = Math.atan2(5, 5);
-	var	tempo =  Math.sin(temp) * forkLift.speed;
-	//alert("both pos" + tempo);
-	temp = Math.atan2(5, -5);
-	tempo = Math.sin(temp) * forkLift.speed;
-	//alert("x neg" + tempo);
-	temp = Math.atan2(-5, 5);
-	tempo = Math.sin(temp) * forkLift.speed;
-	//alert("y neg" + tempo);
-	temp = Math.atan2(-5, -5);
-	tempo = Math.sin(temp) * forkLift.speed;
-	//alert("both neg" + tempo);
+function spawnMag() {
+	var chance = Math.floor(Math.random() * 100);
+	if(chance == 1 && magnet.duration == 0) {
+			magnet.held = 0;
+			magnet.duration = 500;
+			magnet.x = Math.floor(Math.random() * (windowedWidth - factoryWall*3)) + 2*factoryWall;
+			magnet.y = Math.floor(Math.random() * (playHeight - factoryWall*3)) + 2*factoryWall;
+	}
+}
+
+function drawBomb() {
+		var px;//54 99
+		if(bomb.active == 0) {
+			px =0;
+		} else {
+			px = ((5 - (Math.floor(bomb.ticker / 100))) * 49) + 49;
+		}
+		console.log(px);
+		ctx.drawImage(spr_bomb,px + 4,0,49,99,bomb.x, bomb.y, 49, 99);
+		ctx.fillRect(bomb.x, bomb.x, 10, 10);
+		bomb.ticker--;
+}
+
+function spawnBomb() {
+	var chance = Math.floor(Math.random() * 100);
+	if(chance == 1 && bomb.spawn == 0) {
+			bomb.spawn = 1;
+			bomb.ticker = 500;
+			bomb.x = Math.floor(Math.random() * (windowedWidth - factoryWall*3)) + 2*factoryWall;
+			bomb.y = Math.floor(Math.random() * (playHeight - factoryWall*3)) + 2*factoryWall;
+	}
 }
 
 //corners of player are (x, y),(x + width, y), (x, y + width), (x+ width, y + width)
@@ -88,13 +137,13 @@ function boxCollision(player) {
 		var xDiff = boxes[i].x - player.collisionBox.x;
 		var yDiff = boxes[i].y - player.collisionBox.y;
 		var cDst = Math.sqrt(Math.pow(xDiff,2) + Math.pow(yDiff,2));
-		if(cDst < 20) {	
+		if(cDst < (boxes[i].width / 2) +10) {	
 			boxes[i].rotation = player.angle * TO_RADIANS;
 			boxes[i].xvel = Math.cos(player.angle* TO_RADIANS) * player.moveSpeed;
 			boxes[i].yvel = Math.sin(player.angle* TO_RADIANS) * player.moveSpeed;
 		}
 		//magnet power up
-		if(magnet == 1) {
+		if(magnet.duration > 0 && magnet.held == 1) {
 			if(cDst < 700) {
 				var towardsAngle = Math.atan2(yDiff, xDiff);
 				boxes[i].rotation = towardsAngle;
@@ -103,13 +152,18 @@ function boxCollision(player) {
 			}
 		}
 		//booom
-		if(explosion == 1) {
+		if(bomb.explode == 1) {
 			if(cDst < 700) {
-				var towardsAngle = Math.atan2(yDiff, xDiff);
+				var xDiffB = boxes[i].x - bomb.x;
+				var yDiffB = boxes[i].y - bomb.y;
+				var towardsAngle = Math.atan2(yDiffB, xDiffB);
 				boxes[i].rotation = towardsAngle;
 				boxes[i].xvel = Math.cos(towardsAngle) * Math.pow((.99),cDst) * 80;
 				boxes[i].yvel = Math.sin(towardsAngle) * Math.pow((.99),cDst) * 80;
 			}
+			bomb.spawn = 0;
+			bomb.ticker = 0;
+			bomb.active = 0;
 		}
 		//wall collisions
 		if(boxes[i].x > windowedWidth - (boxes[i].width / 2)) {
@@ -131,13 +185,10 @@ function boxCollision(player) {
 		}
 		//rectangle hitbox	
 		for(j = 0; j < boxes.length; j++) {
-			if(i < 0 || j < 0) {
-				alert('mountain momma');
-			}
 			var b2bDist = Math.pow(boxes[i].x - boxes[j].x, 2) + Math.pow(boxes[i].y - boxes[j].y, 2);
 			if(b2bDist < 3.5*(boxes[i].width + boxes[j].width) && i != j) {
 			//if(i != j && boxes.length > 20) {
-				if(boxes[i].color == boxes[j].color) {
+				if(boxes[i].color == boxes[j].color && boxes[i].width < 60 && boxes[j].width < 60) {
 				//if(true) {
 					//merge those mommas
 					if(boxes[i].width < boxes[j].width) {
@@ -191,22 +242,17 @@ function boxCollision(player) {
 			}
 		}
 	}
-	if(explosion == 1) {
-		explosion = 0;
-	}
+	bomb.explode = 0;
 }
 
 function removeBoxes() {
 	for(i = boxes.length - 1; i >= 0; i--) {
 		if(boxes[i].x > 889) { 
 			if(boxes[i].color == 0 && boxes[i].y < 134){
-				console.log('b');
 				boxes.splice(i, 1);
 			} else if(boxes[i].color == 1 && boxes[i].y > 202 && boxes[i].y < 333) {
-				console.log('g');
 				boxes.splice(i, 1);
 			} else if(boxes[i].color == 2 && boxes[i].y > 404) {
-				console.log('r');
 				boxes.splice(i, 1);
 			}
 		}
@@ -297,6 +343,14 @@ function playerMovement(player) {
   } else if(player.collisionPt.y < 6) {
 	  player.y = prevY;
   }
+  if(Math.abs(player.collisionPt.y - magnet.y) < 40 && Math.abs(player.collisionPt.x - magnet.x) < 40 && magnet.held == 0) {
+	  magnet.held = 1;
+	  magnet.duration = 750;
+  }
+    if(Math.abs(player.collisionPt.y - bomb.y) < 30 && Math.abs(player.collisionPt.x - bomb.x) < 30 && bomb.active== 0) {
+	  bomb.active = 1;
+	  bomb.ticker = 599;
+  }
 }
 
 function drawRotatedImage(image, x, y, angle) {
@@ -304,12 +358,21 @@ function drawRotatedImage(image, x, y, angle) {
 	ctx.translate(x, y);
 	ctx.rotate(angle * TO_RADIANS);
 	ctx.drawImage(image, -(forkLift.size/2), -(forkLift.size/2));
-	if(magnet == 1) {
+	ctx.restore();
+
+}
+function drawMag() {
+	ctx.save();
+	if(magnet.held == 1) {	
+		ctx.translate(forkLift.x, forkLift.y);
+		ctx.rotate(forkLift.angle * TO_RADIANS);
 		ctx.rotate(90 * TO_RADIANS);
+		ctx.drawImage(magnetPic, -18, -40);
+	} else{
+		ctx.translate(magnet.x + 20, magnet.y + 20);
 		ctx.drawImage(magnetPic, -18, -40);
 	}
 	ctx.restore();
-
 }
 
 function drawUI() {
