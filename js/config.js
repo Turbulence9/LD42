@@ -16,3 +16,7 @@ let magnetPic = new Image(40, 54);
 magnetPic.src = './assets/magnet.png';
 let spr_bomb = new Image(358, 99);
 spr_bomb.src = './assets/bombomb.png';
+let nums = new Image(484, 86);
+nums.src = 'assets/nums.png';
+let params = new Image(248, 150);
+params.src = 'assets/params.png';

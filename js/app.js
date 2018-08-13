@@ -10,6 +10,7 @@ let TO_RADIANS = Math.PI/180;
 let smallestBox = 16;
 let factoryWall = 87;
 let explosion = 0;
+let maxBoxCount = 100;
 
 let forkLift = {
   x: 200,
@@ -90,6 +91,8 @@ function update() {
   if(bomb.spawn == 1) {
 	  drawBomb();
   }
+
+  fuelStation();
   boxCollision(forkLift);
   removeBoxes();
   drawUI();
@@ -183,7 +186,7 @@ function boxCollision(player) {
 			boxes[i].y = (boxes[i].width / 2) + 1;
 			boxes[i].yvel *= -.5;
 		}
-		//rectangle hitbox	
+		//rectangle hitbox
 		for(j = 0; j < boxes.length; j++) {
 			var b2bDist = Math.pow(boxes[i].x - boxes[j].x, 2) + Math.pow(boxes[i].y - boxes[j].y, 2);
 			if(b2bDist < 3.5*(boxes[i].width + boxes[j].width) && i != j) {
@@ -232,7 +235,7 @@ function boxCollision(player) {
 				} else {
 					boxes[i].rotation = boxes[j].rotation;
 					boxes[i].xvel = boxes[j].xvel;
-					boxes[i].yvel = boxes[j].yvel;					
+					boxes[i].yvel = boxes[j].yvel;
 					boxes[i].x += boxes[j].xvel;
 					boxes[i].y += boxes[j].yvel;
 					boxes[i].idleLock = 0;
@@ -247,7 +250,7 @@ function boxCollision(player) {
 
 function removeBoxes() {
 	for(i = boxes.length - 1; i >= 0; i--) {
-		if(boxes[i].x > 889) { 
+		if(boxes[i].x > 889) {
 			if(boxes[i].color == 0 && boxes[i].y < 134){
 				boxes.splice(i, 1);
 			} else if(boxes[i].color == 1 && boxes[i].y > 202 && boxes[i].y < 333) {
@@ -324,7 +327,7 @@ function playerMovement(player) {
   if (SPACE && fuel.fuelPercent > 0) {
     player.x += Math.cos(player.angle*TO_RADIANS) * player.moveSpeed;
     player.y += Math.sin(player.angle*TO_RADIANS) * player.moveSpeed;
-    fuel.fuelPercent-=0;
+    fuel.fuelPercent-=0.1;
   }
   if (LEFT) {
     player.angle -= player.angleSpeed;
@@ -393,6 +396,25 @@ function drawUI() {
   ctx.lineTo(700, 586);
   ctx.fill();
   ctx.fillRect(700, 568, -600*((100-fuel.fuelPercent)*0.01), 48);
+  ctx.drawImage(params,720,570,62,38);
+  let boxCountArr = (boxes.length+"").split('');
+  boxCountArr.push('10');
+  (maxBoxCount+"").split("").forEach(el => {
+    boxCountArr.push(el);
+  });
+
+  for (let i = 0; i < boxCountArr.length; i++) {
+    ctx.drawImage(nums,44 * parseInt(boxCountArr[i]), 0, 44, 86, 800 + 22 * i, 550, 18, 32);
+  }
+}
+
+function fuelStation() {
+  //ctx.fillRect(508,0,124,55);
+  let x = forkLift.x;
+  let y = forkLift.y;
+  if (x >= 508 && x <= 632 && y <= 55 && fuel.fuelPercent < 100) {
+    fuel.fuelPercent += 0.3;
+  }
 }
 
 window.addEventListener("keydown", onKeyDown, false);
