@@ -103,6 +103,12 @@ function update() {
     }  else {
   	  bomb.x = -1000;
     }
+	if(boxes.length > maxBoxCount) {
+		level = "end";
+	}
+	if (fuel.fuelPercent < 0) {
+		level = "end";
+	}
     fuelStation();
     boxCollision(forkLift);
     removeBoxes();
@@ -110,8 +116,9 @@ function update() {
   }
   if (level == "end") {
     ctx.drawImage(end,0,0,1024,640);
-    if (pressedKeys.includes(32)) {
-      level = "game";
+    if (pressedKeys.includes(82)) {
+      level = "start";
+	 location.reload();
     }
   }
   requestAnimationFrame(update);
