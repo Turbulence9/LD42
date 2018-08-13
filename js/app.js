@@ -116,7 +116,6 @@ function drawBomb() {
 		} else {
 			px = ((5 - (Math.floor(bomb.ticker / 100))) * 49) + 49;
 		}
-		console.log(px);
 		ctx.drawImage(spr_bomb,px + 4,0,49,99,bomb.x - 20, bomb.y - 40, 49, 99);
 		bomb.ticker--;
 }
@@ -160,7 +159,7 @@ function boxCollision(player) {
 				var yDiffB = boxes[i].y - bomb.y - 40;
 				var towardsAngle = Math.atan2(yDiffB, xDiffB);
 				boxes[i].rotation = towardsAngle;
-				boxes[i].xvel = Math.cos(towardsAngle) * Math.pow((.99),cDst) * 100;
+				boxes[i].xvel = Math.cos(towardsAngle) * Math.pow((.999),cDst) * 100;
 				boxes[i].yvel = Math.sin(towardsAngle) * Math.pow((.999),cDst) * 100;
 			}
 			bomb.spawn = 0;
@@ -420,6 +419,7 @@ window.addEventListener("keydown", onKeyDown, false);
 window.addEventListener("keyup", onKeyUp, false);
 
 function onKeyDown(event){
+audio.play();
   var keyCode = event.keyCode;
   if (!pressedKeys.includes(keyCode)) {
     pressedKeys.push(keyCode);
