@@ -85,12 +85,16 @@ function update() {
   if(magnet.duration > 0) {
 	  drawMag();
 	  magnet.duration--;
+  } else {
+	  magnet.x = -1000;
   }
   if(bomb.active == 1 && bomb.ticker == 90) {
 	  bomb.explode = 1;
   }
   if(bomb.spawn == 1) {
 	  drawBomb();
+  } else {
+	  bomb.x = -1000;
   }
 
   fuelStation();
@@ -101,7 +105,7 @@ function update() {
 }
 
 function spawnMag() {
-	var chance = Math.floor(Math.random() * 100);
+	var chance = Math.floor(Math.random() * 1000);
 	if(chance == 1 && magnet.duration == 0) {
 			magnet.held = 0;
 			magnet.duration = 500;
