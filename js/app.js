@@ -11,6 +11,7 @@ let smallestBox = 16;
 let factoryWall = 87;
 let magnet = 0;
 let explosion = 0;
+let maxBoxCount = 100;
 
 let forkLift = {
   x: 200,
@@ -59,6 +60,7 @@ function update() {
     fuel.frameCount++;
   }
   drawBoxes();
+  fuelStation();
   boxCollision(forkLift);
   removeBoxes();
   drawUI();
@@ -140,10 +142,10 @@ function boxCollision(player) {
 				if(boxes[i].color == boxes[j].color) {
 				//if(true) {
 					//merge those mommas
-					if(curIbox.width < boxes[j].width) {
-						curIbox.width = (curIbox.width / 4) + boxes[j].width;
+					if(boxes[i].width < boxes[j].width) {
+						boxes[i].width = (boxes[i].width / 4) + boxes[j].width;
 					} else {
-						curIbox.width += boxes[j].width / 4;
+						boxes[i].width += boxes[j].width / 4;
 					}
 					boxes.splice(j, 1);
 					j--;
@@ -258,10 +260,6 @@ function drawBoxes() {
 		}
 		ctx.restore();
 		//update box position for next draw
-    if(i == 0) {
-      console.log("xvel",boxes[i].xvel);
-      console.log("yvel",boxes[i].yvel);
-    }
 		boxes[i].x+=boxes[i].xvel;
 		boxes[i].y+=boxes[i].yvel;
 		boxes[i].xvel *= 0.92;
@@ -282,7 +280,7 @@ function playerMovement(player) {
   if (SPACE && fuel.fuelPercent > 0) {
     player.x += Math.cos(player.angle*TO_RADIANS) * player.moveSpeed;
     player.y += Math.sin(player.angle*TO_RADIANS) * player.moveSpeed;
-    fuel.fuelPercent-=0;
+    fuel.fuelPercent-=0.1;
   }
   if (LEFT) {
     player.angle -= player.angleSpeed;
@@ -334,6 +332,25 @@ function drawUI() {
   ctx.lineTo(700, 586);
   ctx.fill();
   ctx.fillRect(700, 568, -600*((100-fuel.fuelPercent)*0.01), 48);
+  ctx.drawImage(params,720,570,62,38);
+  let boxCountArr = (boxes.length+"").split('');
+  boxCountArr.push('10');
+  (maxBoxCount+"").split("").forEach(el => {
+    boxCountArr.push(el);
+  });
+
+  for (let i = 0; i < boxCountArr.length; i++) {
+    ctx.drawImage(nums,44 * parseInt(boxCountArr[i]), 0, 44, 86, 800 + 22 * i, 550, 18, 32);
+  }
+}
+
+function fuelStation() {
+  //ctx.fillRect(508,0,124,55);
+  let x = forkLift.x;
+  let y = forkLift.y;
+  if (x >= 508 && x <= 632 && y <= 55 && fuel.fuelPercent < 100) {
+    fuel.fuelPercent += 0.3;
+  }
 }
 
 window.addEventListener("keydown", onKeyDown, false);
