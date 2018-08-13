@@ -160,8 +160,8 @@ function boxCollision(player) {
 				var yDiffB = boxes[i].y - bomb.y - 40;
 				var towardsAngle = Math.atan2(yDiffB, xDiffB);
 				boxes[i].rotation = towardsAngle;
-				boxes[i].xvel = Math.cos(towardsAngle) * Math.pow((.99),cDst) * 80;
-				boxes[i].yvel = Math.sin(towardsAngle) * Math.pow((.99),cDst) * 80;
+				boxes[i].xvel = Math.cos(towardsAngle) * Math.pow((.99),cDst) * 100;
+				boxes[i].yvel = Math.sin(towardsAngle) * Math.pow((.999),cDst) * 100;
 			}
 			bomb.spawn = 0;
 			bomb.ticker = 0;
