@@ -12,6 +12,7 @@ let factoryWall = 87;
 let magnet = 0;
 let explosion = 0;
 let maxBoxCount = 100;
+let score = 0;
 
 let forkLift = {
   x: 200,
@@ -203,12 +204,15 @@ function removeBoxes() {
 		if(boxes[i].x > 889) {
 			if(boxes[i].color == 0 && boxes[i].y < 134){
 				console.log('b');
+        score += boxes[i].width;
 				boxes.splice(i, 1);
 			} else if(boxes[i].color == 1 && boxes[i].y > 202 && boxes[i].y < 333) {
 				console.log('g');
+        score += boxes[i].width;
 				boxes.splice(i, 1);
 			} else if(boxes[i].color == 2 && boxes[i].y > 404) {
 				console.log('r');
+        score += boxes[i].width;
 				boxes.splice(i, 1);
 			}
 		}
@@ -342,6 +346,11 @@ function drawUI() {
   for (let i = 0; i < boxCountArr.length; i++) {
     ctx.drawImage(nums,44 * parseInt(boxCountArr[i]), 0, 44, 86, 800 + 22 * i, 550, 18, 32);
   }
+  let scoreArr = (score+"").split('');
+  for (let i = 0; i < scoreArr.length; i++) {
+    ctx.drawImage(nums,44 * parseInt(scoreArr[i]), 0, 44, 86, 800 + 22 * i, 590, 18, 32);
+  }
+  ctx.drawImage(spr_box,804+22*scoreArr.length,600,16,16);
 }
 
 function fuelStation() {
