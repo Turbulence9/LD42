@@ -12,6 +12,8 @@ let factoryWall = 87;
 let explosion = 0;
 let maxBoxCount = 100;
 let score = 0;
+let pressedKeys = [];
+let level = "start";
 
 let forkLift = {
   x: 200,
@@ -61,42 +63,57 @@ var boxes = [];
 var frameCount = 0;
 
 function update() {
+  console.log(pressedKeys);
   canvas.width = canvas.width;
+  if (level == "start") {
+    ctx.drawImage(start,0,0,1024,640);
+    if (pressedKeys.includes(32)) {
+      level = "game";
+    }
+  }
+  if (level == "game") {
     ctx.drawImage(background,0, 0, 1024, 540);
-  drawRotatedImage(spr_forkLift,forkLift.x,forkLift.y,forkLift.angle);
-  playerMovement(forkLift);
-  if(frameCount % 100 == 0) {
-	spawnBoxes();
-  }
-  if(bomb.ticker == 0 && bomb.spawn == 1) {
-	bomb.spawn = 0;
-	bomb.active = 0;
-  }
-  spawnMag();
-  spawnBomb();
-  if(frameCount % 500 == 0) {
-	  explosion = 1;
-  }
-  frameCount+=1;
-  if (frameCount % fuel.fuelsprSpd == 0) {
-    fuel.frameCount++;
-  }
-  drawBoxes();
-  if(magnet.duration > 0) {
-	  drawMag();
-	  magnet.duration--;
-  }
-  if(bomb.active == 1 && bomb.ticker == 90) {
-	  bomb.explode = 1;
-  }
-  if(bomb.spawn == 1) {
-	  drawBomb();
-  }
+    drawRotatedImage(spr_forkLift,forkLift.x,forkLift.y,forkLift.angle);
+    playerMovement(forkLift);
+    if(frameCount % 100 == 0) {
+      spawnBoxes();
+    }
+    if(bomb.ticker == 0 && bomb.spawn == 1) {
+      bomb.spawn = 0;
+      bomb.active = 0;
+    }
+    spawnMag();
+    spawnBomb();
+    if(frameCount % 500 == 0) {
+      explosion = 1;
+    }
+    frameCount+=1;
+    if (frameCount % fuel.fuelsprSpd == 0) {
+      fuel.frameCount++;
+    }
+    drawBoxes();
+    if(magnet.duration > 0) {
+      drawMag();
+      magnet.duration--;
+    }
+    if(bomb.active == 1 && bomb.ticker == 90) {
+      bomb.explode = 1;
+    }
+    if(bomb.spawn == 1) {
+      drawBomb();
+    }
 
-  fuelStation();
-  boxCollision(forkLift);
-  removeBoxes();
-  drawUI();
+    fuelStation();
+    boxCollision(forkLift);
+    removeBoxes();
+    drawUI();
+  }
+  if (level == "end") {
+    ctx.drawImage(end,0,0,1024,640);
+    if (pressedKeys.includes(32)) {
+      level = "game";
+    }
+  }
   requestAnimationFrame(update);
 }
 
@@ -315,8 +332,6 @@ function drawBoxes() {
 		boxes[i].yvel *= 0.92;
 	}
 }
-
-let pressedKeys = [];
 
 function playerMovement(player) {
 	player.collisionPt = {x:player.x + Math.cos(player.angle*TO_RADIANS )*player.size/2, y:player.y + Math.sin(player.angle*TO_RADIANS) * player.size/2};
